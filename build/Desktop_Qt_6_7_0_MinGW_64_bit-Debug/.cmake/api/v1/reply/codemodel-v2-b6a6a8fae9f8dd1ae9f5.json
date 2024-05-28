@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-111960381bb89ddacd5e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "pocketbase-cpp",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "pocketbase-cpp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pocketbase-cpp-Debug-32cba95031766f759bd6.json",
+					"name" : "pocketbase-cpp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pocketbase-cpp_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pocketbase-cpp_autogen-Debug-2507962509ff938886ed.json",
+					"name" : "pocketbase-cpp_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pocketbase-cpp_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pocketbase-cpp_autogen_timestamp_deps-Debug-884250ceb5e517663ff3.json",
+					"name" : "pocketbase-cpp_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "B:/Repos/pocketbase-cpp/pocketbase-cpp/build/Desktop_Qt_6_7_0_MinGW_64_bit-Debug",
+		"source" : "B:/Repos/pocketbase-cpp/pocketbase-cpp"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}
