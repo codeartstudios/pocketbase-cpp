@@ -7,7 +7,7 @@ class RecordService : public QObject
 {
     Q_OBJECT
 public:
-    explicit RecordService(QObject *parent = nullptr);
+    explicit RecordService(const QString &collectionIdOrName, QObject *parent = nullptr);
 
 signals:
 };

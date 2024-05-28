@@ -1,5 +1,5 @@
 #include "recordservice.h"
 
-RecordService::RecordService(QObject *parent)
+RecordService::RecordService(const QString &collectionIdOrName, QObject *parent)
     : QObject{parent}
 {}

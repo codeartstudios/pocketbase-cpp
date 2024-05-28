@@ -3,6 +3,11 @@
 
 #include <QObject>
 #include <QMap>
+#include <QVariant>
+#include <QUrl>
+#include <QDebug>
+
+
 #include "authstore.h"
 #include "adminservice.h"
 #include "collectionservice.h"
@@ -19,7 +24,7 @@ class QPocketBase : public QObject
     Q_OBJECT
 public:
     // explicit QPocketBase();
-    QPocketBase(QString& baseUrl, QString& lang = "en-US", AuthStore* authStore = nullptr, QObject *parent = nullptr);
+    QPocketBase(QString& baseUrl, const QString& lang = "en-US", AuthStore* authStore = nullptr, QObject *parent = nullptr);
 
     /// The PocketBase backend base url address (eg. 'http://127.0.0.1:8090').
     // Q_PROPERTY(QString baseUrl READ baseUrl WRITE setBaseUrl NOTIFY baseUrlChanged FINAL)
@@ -29,102 +34,50 @@ public:
     /// with the requests to the server as `Accept-Language` header.
     Q_PROPERTY(QString lang READ lang WRITE setLang NOTIFY langChanged FINAL)
 
+    /// The underlying http client that will be used to send the request.
+    /// This is used primarily for the unit tests.
+    // late final http.Client Function() httpClientFactory;
+
+    /// Returns the RecordService associated to the specified collection.
+    RecordService* collection(const QString& collectionIdOrName);
+
+    /// Constructs a filter expression with placeholders populated from a map.
+    ///
+    /// Placeholder parameters are defined with the `{:paramName}` notation.
+    ///
+    /// The following parameter values are supported:
+    /// - `String` (_single quotes are autoescaped_)
+    /// - `num`
+    /// - `bool`
+    /// - `DateTime`
+    /// - `null`
+    /// - everything else is converted to a string using `jsonEncode()`
+    ///
+    /// Example:
+    ///
+    /// ```dart
+    /// pb.collection("example").getList(filter: pb.filter(
+    ///   "title ~ {:title} && created >= {:created}",
+    ///   { "title": "example", "created": DateTime.now() },
+    /// ));
+    /// ```
+    QString filter(const QString& expr, const QMap<QString, QVariant>& query);
+
+    /// Legacy alias of `pb.files.getUrl()`.
+    // QString getFileUrl( RecordModel record, QString filename, QString thumb="", QString token="", QMap<QString, QVariant> query = {} ) {
+    //     return m_files.getUrl( record, filename, thumb, token, query );
+    // }
+
+    /// Builds and returns a full request url by safely concatenating
+    /// the provided path to the base url.
+    QUrl buildUrl(QString path, QMap<QString, QVariant> queryParameters );
+
+
     /*
      * class PocketBase {
 
 
-  /// The underlying http client that will be used to send the request.
-  /// This is used primarily for the unit tests.
-  late final http.Client Function() httpClientFactory;
 
-
-
-  /// Returns the RecordService associated to the specified collection.
-  RecordService collection(String collectionIdOrName) {
-    var service = _recordServices[collectionIdOrName];
-
-    if (service == null) {
-      // create and cache the service
-      service = RecordService(this, collectionIdOrName);
-      _recordServices[collectionIdOrName] = service;
-    }
-
-    return service;
-  }
-
-  /// Constructs a filter expression with placeholders populated from a map.
-  ///
-  /// Placeholder parameters are defined with the `{:paramName}` notation.
-  ///
-  /// The following parameter values are supported:
-  /// - `String` (_single quotes are autoescaped_)
-  /// - `num`
-  /// - `bool`
-  /// - `DateTime`
-  /// - `null`
-  /// - everything else is converted to a string using `jsonEncode()`
-  ///
-  /// Example:
-  ///
-  /// ```dart
-  /// pb.collection("example").getList(filter: pb.filter(
-  ///   "title ~ {:title} && created >= {:created}",
-  ///   { "title": "example", "created": DateTime.now() },
-  /// ));
-  /// ```
-  String filter(String expr, [Map<String, dynamic> query = const {}]) {
-    if (query.isEmpty) {
-      return expr;
-    }
-
-    query.forEach((key, value) {
-      if (value == null || value is num || value is bool) {
-        value = value.toString();
-      } else if (value is DateTime) {
-        value = "'${value.toUtc().toIso8601String().replaceFirst("T", " ")}'";
-      } else if (value is String) {
-        value = "'${value.replaceAll("'", "\\'")}'";
-      } else {
-        value = "'${jsonEncode(value).replaceAll("'", "\\'")}'";
-      }
-      expr = expr.replaceAll("{:$key}", value.toString());
-    });
-
-    return expr;
-  }
-
-  /// Legacy alias of `pb.files.getUrl()`.
-  Uri getFileUrl(
-    RecordModel record,
-    String filename, {
-    String? thumb,
-    String? token,
-    Map<String, dynamic> query = const {},
-  }) {
-    return files.getUrl(
-      record,
-      filename,
-      thumb: thumb,
-      token: token,
-      query: query,
-    );
-  }
-
-  /// Builds and returns a full request url by safely concatenating
-  /// the provided path to the base url.
-  Uri buildUrl(String path, [Map<String, dynamic> queryParameters = const {}]) {
-    var url = baseUrl + (baseUrl.endsWith("/") ? "" : "/");
-
-    if (path.isNotEmpty) {
-      url += path.startsWith("/") ? path.substring(1) : path;
-    }
-
-    final query = _normalizeQueryParameters(queryParameters);
-
-    return Uri.parse(url).replace(
-      queryParameters: query.isNotEmpty ? query : null,
-    );
-  }
 
   /// Sends a single HTTP request built with the current client configuration
   /// and the provided options.
@@ -287,7 +240,17 @@ public:
 }
      */
 
+    QString baseUrl() const;
+    void setBaseUrl(const QString &newBaseUrl);
+
+    QString lang() const;
+    void setLang(const QString &newLang);
+
 signals:
+
+    void baseUrlChanged();
+
+    void langChanged();
 
 private:
     /// An instance of the local [AuthStore] service.
@@ -322,7 +285,10 @@ private:
     BackupService* m_backups;
 
     /// Cache of all created RecordService instances.
-    QMap<QString, RecordService> m_recordServices;
+    QMap<QString, RecordService*> m_recordServices;
+
+    QString m_baseUrl;
+    QString m_lang;
 };
 
 #endif // QPOCKETBASE_H
