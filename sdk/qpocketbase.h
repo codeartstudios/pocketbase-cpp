@@ -6,25 +6,35 @@
 #include <QVariant>
 #include <QUrl>
 #include <QDebug>
+#include <QObject>
+#include <QUrl>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QHttpMultiPart>
+#include <QMap>
+#include <QString>
+#include <memory>
 
+class BaseAuthStore;
+class AdminService;
+class BackupService;
+class CollectionService;
+class LogService;
+class RealtimeService;
+class RecordService;
+class SettingsService;
+class FileService;
+class HealthService;
 
-#include "authstore.h"
-#include "adminservice.h"
-#include "collectionservice.h"
-#include "fileservice.h"
-#include "realtimeservice.h"
-#include "settingsservice.h"
-#include "logservice.h"
-#include "healthservice.h"
-#include "backupservice.h"
-#include "recordservice.h"
 
 class QPocketBase : public QObject
 {
     Q_OBJECT
 public:
-    // explicit QPocketBase();
-    QPocketBase(QString& baseUrl, const QString& lang = "en-US", AuthStore* authStore = nullptr, QObject *parent = nullptr);
+    QPocketBase(const QString& baseUrl = "/", const QString& lang = "en-US", std::shared_ptr<BaseAuthStore> authStore = nullptr, int timeout = 120, QObject* parent = nullptr);
 
     /// The PocketBase backend base url address (eg. 'http://127.0.0.1:8090').
     // Q_PROPERTY(QString baseUrl READ baseUrl WRITE setBaseUrl NOTIFY baseUrlChanged FINAL)
@@ -34,12 +44,8 @@ public:
     /// with the requests to the server as `Accept-Language` header.
     Q_PROPERTY(QString lang READ lang WRITE setLang NOTIFY langChanged FINAL)
 
-    /// The underlying http client that will be used to send the request.
-    /// This is used primarily for the unit tests.
-    // late final http.Client Function() httpClientFactory;
-
     /// Returns the RecordService associated to the specified collection.
-    RecordService* collection(const QString& collectionIdOrName);
+    std::shared_ptr<RecordService> collection(const QString& idOrName);
 
     /// Constructs a filter expression with placeholders populated from a map.
     ///
@@ -72,173 +78,9 @@ public:
     /// the provided path to the base url.
     QUrl buildUrl(QString path, QMap<QString, QVariant> queryParameters );
 
+    QUrl getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams);
 
-    /*
-     * class PocketBase {
-
-
-
-
-  /// Sends a single HTTP request built with the current client configuration
-  /// and the provided options.
-  ///
-  /// All response errors are normalized and wrapped in [ClientException].
-  Future<dynamic> send(
-    String path, {
-    String method = "GET",
-    Map<String, String> headers = const {},
-    Map<String, dynamic> query = const {},
-    Map<String, dynamic> body = const {},
-    List<http.MultipartFile> files = const [],
-  }) async {
-    http.BaseRequest request;
-
-    final url = buildUrl(path, query);
-
-    if (files.isEmpty) {
-      request = _jsonRequest(method, url, headers: headers, body: body);
-    } else {
-      request = _multipartRequest(
-        method,
-        url,
-        headers: headers,
-        body: body,
-        files: files,
-      );
-    }
-
-    if (!headers.containsKey("Authorization") && authStore.isValid) {
-      request.headers["Authorization"] = authStore.token;
-    }
-
-    if (!headers.containsKey("Accept-Language")) {
-      request.headers["Accept-Language"] = lang;
-    }
-
-    // ensures that keepalive on web is disabled for now
-    //
-    // it is ignored anyway when using the default http.Cient on web
-    // and it causing issues with the alternative fetch_client package
-    // (see https://github.com/Zekfad/fetch_client/issues/6#issuecomment-1615936365)
-    if (isWeb) {
-      request.persistentConnection = false;
-    }
-
-    final requestClient = httpClientFactory();
-
-    try {
-      final response = await requestClient.send(request);
-      final responseStr = await response.stream.bytesToString();
-
-      dynamic responseData;
-      try {
-        responseData = responseStr.isNotEmpty ? jsonDecode(responseStr) : null;
-      } catch (_) {
-        // custom non-json response
-        responseData = responseStr;
-      }
-
-      if (response.statusCode >= 400) {
-        throw ClientException(
-          url: url,
-          statusCode: response.statusCode,
-          response: responseData is Map<String, dynamic> ? responseData : {},
-        );
-      }
-
-      return responseData;
-    } catch (e) {
-      // PocketBase API exception
-      if (e is ClientException) {
-        rethrow;
-      }
-
-      // http client exception (eg. connection abort)
-      if (e is http.ClientException) {
-        throw ClientException(
-          url: e.uri,
-          originalError: e,
-          // @todo will need to be redefined once cancellation support is added
-          isAbort: true,
-        );
-      }
-
-      // anything else
-      throw ClientException(url: url, originalError: e);
-    } finally {
-      requestClient.close();
-    }
-  }
-
-  http.Request _jsonRequest(
-    String method,
-    Uri url, {
-    Map<String, String> headers = const {},
-    Map<String, dynamic> body = const {},
-  }) {
-    final request = http.Request(method, url);
-
-    if (body.isNotEmpty) {
-      request.body = jsonEncode(body);
-    }
-
-    if (headers.isNotEmpty) {
-      request.headers.addAll(headers);
-    }
-
-    if (!headers.containsKey("Content-Type")) {
-      request.headers["Content-Type"] = "application/json";
-    }
-
-    return request;
-  }
-
-  MultipartRequest _multipartRequest(
-    String method,
-    Uri url, {
-    Map<String, String> headers = const {},
-    Map<String, dynamic> body = const {},
-    List<http.MultipartFile> files = const [],
-  }) {
-    final request = MultipartRequest(method, url)
-      ..files.addAll(files)
-      ..headers.addAll(headers);
-
-    request.fields["@jsonPayload"] = [jsonEncode(body)];
-
-    return request;
-  }
-
-  Map<String, dynamic> _normalizeQueryParameters(
-    Map<String, dynamic> parameters,
-  ) {
-    final result = <String, dynamic>{};
-
-    parameters.forEach((key, value) {
-      final normalizedValue = <String>[];
-
-      // convert to List to normalize access
-      if (value is! Iterable) {
-        value = [value];
-      }
-
-      for (dynamic v in value) {
-        if (v == null) {
-          continue; // skip null query params
-        }
-
-        normalizedValue.add(v.toString());
-      }
-
-      if (normalizedValue.isNotEmpty) {
-        result[key] = normalizedValue;
-      }
-    });
-
-    return result;
-  }
-}
-     */
+    QString getFileToken();
 
     QString baseUrl() const;
     void setBaseUrl(const QString &newBaseUrl);
@@ -250,45 +92,56 @@ signals:
 
     void baseUrlChanged();
 
-    void langChanged();
+    void langChanged();signals:
+
+    void requestFinished(QNetworkReply* reply);
 
 private:
+    QUrl buildUrl(const QString& path);
+    QNetworkReply* send(const QString& path, const QJsonObject& reqConfig);
+
     /// An instance of the local [AuthStore] service.
-    AuthStore* m_authStore;
+    std::shared_ptr<BaseAuthStore> m_authStore;
 
     /// An instance of the service that handles the **Admin APIs**.
-    AdminService* m_admins;
+    std::shared_ptr<AdminService> m_admins;
 
     /// An instance of the service that handles the **Collection APIs**.
-    CollectionService* m_collections;
+    std::shared_ptr<CollectionService> m_collections;
 
     /// An instance of the service that handles the **File APIs**.
-    FileService* m_files;
+    std::shared_ptr<FileService> m_files;
 
     /// An instance of the service that handles the **Realtime APIs**.
     ///
     /// This service is usually used with custom realtime actions.
     /// For records realtime subscriptions you can use the subscribe/unsubscribe
     /// methods available in the `collection()` RecordService.
-    RealtimeService* m_realtime;
+    std::shared_ptr<RealtimeService> m_realtime;
 
     /// An instance of the service that handles the **Settings APIs**.
-    SettingsService* m_settings;
+    std::shared_ptr<SettingsService> m_settings;
 
     /// An instance of the service that handles the **Log APIs**.
-    LogService* m_logs;
+    std::shared_ptr<LogService> m_logs;
 
     /// An instance of the service that handles the **Health APIs**.
-    HealthService* m_health;
+    std::shared_ptr<HealthService> m_health;
 
     /// The service that handles the **Backup and restore APIs**.
-    BackupService* m_backups;
+    std::shared_ptr<BackupService> m_backups;
 
     /// Cache of all created RecordService instances.
     QMap<QString, RecordService*> m_recordServices;
 
+    QMap<QString, std::shared_ptr<RecordService>> recordServices;
+
     QString m_baseUrl;
     QString m_lang;
+    int m_timeout;
+
+
+    std::shared_ptr<QNetworkAccessManager> m_networkManager;
 };
 
 #endif // QPOCKETBASE_H

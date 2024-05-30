@@ -1,32 +1,43 @@
 #include "qpocketbase.h"
+#include "BaseAuthStore.h"
+#include "AdminService.h"
+#include "BackupService.h"
+#include "CollectionService.h"
+#include "LogService.h"
+#include "RealtimeService.h"
+#include "RecordService.h"
+#include "SettingsService.h"
+#include "RecordService.h"
 
-QPocketBase::QPocketBase(QString& baseUrl, const QString& lang, AuthStore* authStore, QObject *parent) :
-    QObject{parent},
+#include <QUrlQuery>
+#include <QNetworkRequest>
+
+
+QPocketBase::QPocketBase(const QString& baseUrl, const QString& lang, std::shared_ptr<BaseAuthStore> authStore, int timeout, QObject* parent)
+    : QObject(parent),
+    m_timeout(timeout),
+    m_networkManager(new QNetworkAccessManager(this)),
     m_baseUrl(baseUrl),
     m_lang(lang),
-    m_authStore((authStore ? authStore : new AuthStore())),
-    m_admins(new AdminService()),
-    m_collections(new CollectionService()),
-    m_files(new FileService()),
-    m_realtime(new RealtimeService()),
-    m_settings(new SettingsService()),
-    m_logs(new LogService()),
-    m_health(new HealthService()),
-    m_backups(new BackupService())
+    m_authStore(authStore ? authStore : std::make_shared<BaseAuthStore>()),
+    m_admins(std::make_shared<AdminService>(this)),
+    m_collections(std::make_shared<CollectionService>(this)),
+    m_files(std::make_shared<FileService>(this)),
+    m_realtime(std::make_shared<RealtimeService>(this)),
+    m_settings(std::make_shared<SettingsService>(this)),
+    m_logs(std::make_shared<LogService>(this)),
+    m_health(std::make_shared<HealthService>(this)),
+    m_backups(std::make_shared<BackupService>(this))
 {
-
+    // Initialize services
+    // this->admins = std::make_shared<AdminService>(this);
 }
 
-RecordService *QPocketBase::collection(const QString &collectionIdOrName) {
-    RecordService* service = m_recordServices.value( collectionIdOrName );
-
-    if ( !m_recordServices.contains( collectionIdOrName )) {
-        // create and cache the service
-        service = new RecordService( collectionIdOrName, this );
-        m_recordServices[collectionIdOrName] = service;
+std::shared_ptr<RecordService> QPocketBase::collection(const QString& idOrName) {
+    if (!recordServices.contains(idOrName)) {
+        recordServices[idOrName] = std::make_shared<RecordService>(this, idOrName);
     }
-
-    return service;
+    return recordServices[idOrName];
 }
 
 QString QPocketBase::filter(const QString &expr, const QMap<QString, QVariant> &query) {
@@ -52,20 +63,61 @@ QString QPocketBase::filter(const QString &expr, const QMap<QString, QVariant> &
     return expr;
 }
 
-QUrl QPocketBase::buildUrl(QString path, QMap<QString, QVariant> queryParameters) {
-    QString url = m_baseUrl + (m_baseUrl.endsWith("/") ? "" : "/");
-
-    if ( path.isEmpty() ) {
-        url += path.startsWith("/") ? path.right( path.size()-1 ) : path;
+QUrl QPocketBase::buildUrl(const QString& path) {
+    QUrl url(m_baseUrl);
+    if (!url.path().endsWith("/")) {
+        url.setPath(url.path() + "/");
     }
 
-    // QString query = _normalizeQueryParameters(queryParameters);
+    url.setPath(url.path() + path);
+    return url;
+}
 
-    // return Uri.parse(url).replace(
-    //     queryParameters: query.isNotEmpty ? query : null,
-    //     );
+QNetworkReply* QPocketBase::send(const QString& path, const QJsonObject& reqConfig) {
+    QUrl url = buildUrl(path);
+    QNetworkRequest request(url);
 
-    return QUrl();
+    // Add headers and other request configuration
+    if (m_authStore->token().isEmpty() && !request.hasRawHeader("Authorization")) {
+        request.setRawHeader("Authorization", m_authStore->token().toUtf8());
+    }
+
+    QJsonDocument jsonDoc(reqConfig);
+    QByteArray jsonData = jsonDoc.toJson();
+
+    QNetworkReply* reply = m_networkManager->post(request, jsonData);
+    connect(reply, &QNetworkReply::finished, this, [=]() {
+        emit requestFinished(reply);
+    });
+
+    return reply;
+}
+
+QUrl QPocketBase::getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams) {
+    QStringList parts = { "api", "files", QUrl::toPercentEncoding(record.collectionId()), QUrl::toPercentEncoding(record.id()), QUrl::toPercentEncoding(filename) };
+    QUrl url = buildUrl(parts.join("/"));
+    if (!queryParams.isEmpty()) {
+        QUrlQuery query;
+        for (auto it = queryParams.begin(); it != queryParams.end(); ++it) {
+            query.addQueryItem(it.key(), it.value());
+        }
+        url.setQuery(query);
+    }
+    return url;
+}
+
+QString QPocketBase::getFileToken() {
+    QJsonObject reqConfig;
+    reqConfig["method"] = "POST";
+    QNetworkReply* reply = sendRequest("/api/files/token", reqConfig);
+
+    auto data = reply->readAll().data();
+
+    qDebug() << "Reply [File Token] " << data;
+
+    // Handle reply and extract token
+
+    return QString(); // Placeholder
 }
 
 QString QPocketBase::baseUrl() const
