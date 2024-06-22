@@ -30,6 +30,6 @@ std::shared_ptr<BaseModel> CrudService::update(const QString& id, const QJsonObj
     return _update(baseCrudPath(), id, bodyParams, queryParams);
 }
 
-bool CrudService::deleteItem(const QString& id, const QJsonObject& queryParams) {
+bool CrudService::deleteOne(const QString& id, const QJsonObject& queryParams) {
     return _delete(baseCrudPath(), id, queryParams);
 }

@@ -7,8 +7,11 @@
 #include <QString>
 #include <QJsonObject>
 
+#include "qpocketbase.h"
 #include "utils/crudservice.h"
 #include "models/AdminModel.h"
+#include "baseauthstore.h"
+#include "recordservice.h"
 
 class AdminAuthResponse {
 public:

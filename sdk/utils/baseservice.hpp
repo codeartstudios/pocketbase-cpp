@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <memory>
+#include <QJsonObject>
 
 class QPocketBase; // Forward declaration of QPocketBase class
 

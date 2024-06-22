@@ -19,7 +19,7 @@ add_executable(pocketbase-cpp
   sdk/adminservice.h sdk/adminservice.cpp
   sdk/collectionservice.h sdk/collectionservice.cpp
   sdk/fileservice.h sdk/fileservice.cpp
-  sdk/realtimeservice.h sdk/realtimeservice.cpp
+  # sdk/realtimeservice.h sdk/realtimeservice.cpp
   sdk/settingsservice.h sdk/settingsservice.cpp
   sdk/logservice.h sdk/logservice.cpp
   sdk/healthservice.h sdk/healthservice.cpp
@@ -38,6 +38,10 @@ add_executable(pocketbase-cpp
   sdk/models/backupmodel.hpp
   sdk/models/collectionmodel.hpp
   sdk/models/fileuploadmodel.hpp
+  # sdk/utils/eventloop.h sdk/utils/eventloop.cpp
+  sdk/event.h sdk/event.cpp
+  sdk/models/recordmodel.hpp
+  sdk/utils/utils.h
 )
 target_link_libraries(pocketbase-cpp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 

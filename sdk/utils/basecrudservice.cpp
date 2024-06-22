@@ -24,7 +24,7 @@ ListResult BaseCrudService::_getList(const QString& basePath, int page, int perP
     params["page"] = page;
     params["perPage"] = perPage;
 
-    QJsonObject response_data = client->send(basePath, { {"method", "GET"}, {"params", params} }).toObject();
+    QJsonObject response_data; // = client->send(basePath, { {"method", "GET"}, {"params", params} }).toObject();
     QList<std::shared_ptr<BaseModel>> items;
     if (response_data.contains("items")) {
         QJsonArray itemsArray = response_data["items"].toArray();
@@ -42,7 +42,8 @@ ListResult BaseCrudService::_getList(const QString& basePath, int page, int perP
 }
 
 std::shared_ptr<BaseModel> BaseCrudService::_getOne(const QString& basePath, const QString& id, const QJsonObject& queryParams) {
-    return decode(client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "GET"}, {"params", queryParams} }).toObject());
+    // return decode(client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "GET"}, {"params", queryParams} }).toObject());
+    return std::shared_ptr<BaseModel>();
 }
 
 std::shared_ptr<BaseModel> BaseCrudService::_getFirstListItem(const QString& basePath, const QString& filter, const QJsonObject& queryParams) {
@@ -50,19 +51,22 @@ std::shared_ptr<BaseModel> BaseCrudService::_getFirstListItem(const QString& bas
     params["filter"] = filter;
     params["$cancelKey"] = "one_by_filter_" + basePath + "_" + filter;
 
-    ListResult result = getList(basePath, 1, 1, params);
-    if (result.items().isEmpty()) {
-        throw ClientResponseError("The requested resource wasn't found.", 404);
-    }
-    return result.items().first();
+    // ListResult result = getList(basePath, 1, 1, params);
+    // if (result.items().isEmpty()) {
+    //     throw ClientResponseError("The requested resource wasn't found.", 404);
+    // }
+    // return result.items().first();
+    return std::shared_ptr<BaseModel>();
 }
 
 std::shared_ptr<BaseModel> BaseCrudService::_create(const QString& basePath, const QJsonObject& bodyParams, const QJsonObject& queryParams) {
-    return decode(client->send(basePath, { {"method", "POST"}, {"params", queryParams}, {"body", bodyParams} }).toObject());
+    // return decode(client->send(basePath, { {"method", "POST"}, {"params", queryParams}, {"body", bodyParams} }).toObject());
+    return std::shared_ptr<BaseModel>();
 }
 
 std::shared_ptr<BaseModel> BaseCrudService::_update(const QString& basePath, const QString& id, const QJsonObject& bodyParams, const QJsonObject& queryParams) {
-    return decode(client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "PATCH"}, {"params", queryParams}, {"body", bodyParams} }).toObject());
+    // return decode(client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "PATCH"}, {"params", queryParams}, {"body", bodyParams} }).toObject());
+    return std::shared_ptr<BaseModel>();
 }
 
 bool BaseCrudService::_delete(const QString& basePath, const QString& id, const QJsonObject& queryParams) {

@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QUrl>
+#include <QUrlQuery>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -88,6 +89,11 @@ public:
     QString lang() const;
     void setLang(const QString &newLang);
 
+    std::shared_ptr<BaseAuthStore> authStore() { return m_authStore; }
+
+
+    QNetworkReply* send(const QString& path, const QJsonObject& reqConfig);
+
 signals:
 
     void baseUrlChanged();
@@ -98,7 +104,6 @@ signals:
 
 private:
     QUrl buildUrl(const QString& path);
-    QNetworkReply* send(const QString& path, const QJsonObject& reqConfig);
 
     /// An instance of the local [AuthStore] service.
     std::shared_ptr<BaseAuthStore> m_authStore;

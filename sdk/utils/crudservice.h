@@ -23,7 +23,7 @@ public:
     std::shared_ptr<BaseModel> getOne(const QString& id, const QJsonObject& queryParams = QJsonObject());
     std::shared_ptr<BaseModel> create(const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
     std::shared_ptr<BaseModel> update(const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
-    bool deleteItem(const QString& id, const QJsonObject& queryParams = QJsonObject());
+    bool deleteOne(const QString& id, const QJsonObject& queryParams = QJsonObject());
 
 protected:
     virtual QString baseCrudPath() const = 0;

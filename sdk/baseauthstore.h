@@ -20,6 +20,10 @@ public:
     void save(const QString& token = "", std::shared_ptr<RecordService> model = nullptr);
     void clear();
 
+    // TODO
+    QString getCollectionId() const { return ""; }
+    QString getCollectionName() const { return ""; }
+
 signals:
 
 private:

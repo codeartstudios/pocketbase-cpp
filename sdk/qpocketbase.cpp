@@ -4,7 +4,7 @@
 #include "BackupService.h"
 #include "CollectionService.h"
 #include "LogService.h"
-#include "RealtimeService.h"
+// #include "RealtimeService.h"
 #include "RecordService.h"
 #include "SettingsService.h"
 #include "RecordService.h"
@@ -23,7 +23,7 @@ QPocketBase::QPocketBase(const QString& baseUrl, const QString& lang, std::share
     m_admins(std::make_shared<AdminService>(this)),
     m_collections(std::make_shared<CollectionService>(this)),
     m_files(std::make_shared<FileService>(this)),
-    m_realtime(std::make_shared<RealtimeService>(this)),
+    // m_realtime(std::make_shared<RealtimeService>(this)),
     m_settings(std::make_shared<SettingsService>(this)),
     m_logs(std::make_shared<LogService>(this)),
     m_health(std::make_shared<HealthService>(this)),
@@ -94,22 +94,22 @@ QNetworkReply* QPocketBase::send(const QString& path, const QJsonObject& reqConf
 }
 
 QUrl QPocketBase::getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams) {
-    QStringList parts = { "api", "files", QUrl::toPercentEncoding(record.collectionId()), QUrl::toPercentEncoding(record.id()), QUrl::toPercentEncoding(filename) };
-    QUrl url = buildUrl(parts.join("/"));
-    if (!queryParams.isEmpty()) {
-        QUrlQuery query;
-        for (auto it = queryParams.begin(); it != queryParams.end(); ++it) {
-            query.addQueryItem(it.key(), it.value());
-        }
-        url.setQuery(query);
-    }
-    return url;
+    // QStringList parts = { "api", "files", QUrl::toPercentEncoding(record.collectionId), QUrl::toPercentEncoding(record.getId()), QUrl::toPercentEncoding(filename) };
+    // QUrl url = buildUrl(parts.join("/"));
+    // if (!queryParams.isEmpty()) {
+    //     QUrlQuery query;
+    //     for (auto it = queryParams.begin(); it != queryParams.end(); ++it) {
+    //         query.addQueryItem(it.key(), it.value());
+    //     }
+    //     url.setQuery(query);
+    // }
+    return QUrl{};
 }
 
 QString QPocketBase::getFileToken() {
     QJsonObject reqConfig;
     reqConfig["method"] = "POST";
-    QNetworkReply* reply = sendRequest("/api/files/token", reqConfig);
+    QNetworkReply* reply = send("/api/files/token", reqConfig);
 
     auto data = reply->readAll().data();
 

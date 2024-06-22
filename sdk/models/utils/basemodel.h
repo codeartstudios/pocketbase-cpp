@@ -12,16 +12,23 @@ class BaseModel : public QObject {
 public:
     explicit BaseModel(const QJsonObject& data = QJsonObject(), QObject* parent = nullptr);
 
-    QString toString() const;
-    QString repr() const;
-    void load(const QJsonObject& data);
-    bool isNew() const;
+    BaseModel(const BaseModel &data) {
+        id = data.getId();
+        created = data.getCreated();
+        updated = data.getUpdated();
+    }
 
-    QString getId() const;
-    QDateTime getCreated() const;
-    QDateTime getUpdated() const;
 
-private:
+    virtual QString toString() const;
+    virtual QString repr() const;
+    virtual void load(const QJsonObject& data);
+    virtual bool isNew() const;
+
+    virtual QString getId() const;
+    virtual QDateTime getCreated() const;
+    virtual QDateTime getUpdated() const;
+
+protected:
     QString id;
     QDateTime created;
     QDateTime updated;
