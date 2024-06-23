@@ -7,7 +7,7 @@
 #include <QString>
 #include <QJsonObject>
 
-#include "qpocketbase.h"
+#include "client.h"
 #include "utils/crudservice.h"
 #include "models/AdminModel.h"
 #include "baseauthstore.h"

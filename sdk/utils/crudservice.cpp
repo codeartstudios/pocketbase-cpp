@@ -1,5 +1,5 @@
 #include "CrudService.h"
-#include "../qpocketbase.h"
+#include "../client.h"
 #include "basecrudservice.h"
 #include "../models/utils/listresult.h"
 

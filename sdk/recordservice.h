@@ -10,10 +10,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QEventLoop>
-#include "qpocketbase.h"
+#include "client.h"
 #include "./utils/crudservice.h"
 #include "models/recordmodel.hpp"
-#include "utils/utils.h"
+#include "globals.h"
 #include "baseauthstore.h"
 
 class RecordAuthResponse {

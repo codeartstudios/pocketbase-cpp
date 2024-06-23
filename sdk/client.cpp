@@ -1,6 +1,6 @@
-#include "qpocketbase.h"
+#include "client.h"
 
-QPocketBase::QPocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
+PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
     m_timeout(timeout),
     m_networkManager(new QNetworkAccessManager(this)),
@@ -12,7 +12,7 @@ QPocketBase::QPocketBase(const QString& baseUrl, const QString& lang, int timeou
     qDebug() << baseUrl;
 }
 
-// std::shared_ptr<RecordService> QPocketBase::collection(const QString& idOrName) {
+// std::shared_ptr<RecordService> PocketBase::collection(const QString& idOrName) {
 //     qDebug() << "Collection init [" << idOrName << "]";
 //     if (!recordServices.contains(idOrName)) {
 //         qDebug() << "[RecordService] No record, creating new one ...";
@@ -23,7 +23,7 @@ QPocketBase::QPocketBase(const QString& baseUrl, const QString& lang, int timeou
 //     return recordServices[idOrName];
 // }
 
-QString QPocketBase::filter(const QString &expr, const QMap<QString, QVariant> &query) {
+QString PocketBase::filter(const QString &expr, const QMap<QString, QVariant> &query) {
     if (query.isEmpty()) {
         return expr;
     }
@@ -46,7 +46,7 @@ QString QPocketBase::filter(const QString &expr, const QMap<QString, QVariant> &
     return expr;
 }
 
-QUrl QPocketBase::buildUrl(const QString& path) {
+QUrl PocketBase::buildUrl(const QString& path) {
     qDebug() << path;
     qDebug() << "--";
     // qDebug() << m_baseurl;
@@ -61,7 +61,7 @@ QUrl QPocketBase::buildUrl(const QString& path) {
     return url;
 }
 
-QNetworkReply* QPocketBase::send(const QString& path, const QJsonObject params) {
+QNetworkReply* PocketBase::send(const QString& path, const QJsonObject params) {
     qDebug() << path;
     qDebug() << baseUrl();
     qDebug() << "Accessing the baseURL";
@@ -108,7 +108,7 @@ QNetworkReply* QPocketBase::send(const QString& path, const QJsonObject params) 
     return reply;
 }
 
-// QUrl QPocketBase::getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams) {
+// QUrl PocketBase::getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams) {
 //     // QStringList parts = { "api", "files", QUrl::toPercentEncoding(record.collectionId), QUrl::toPercentEncoding(record.getId()), QUrl::toPercentEncoding(filename) };
 //     // QUrl url = buildUrl(parts.join("/"));
 //     // if (!queryParams.isEmpty()) {
@@ -121,7 +121,7 @@ QNetworkReply* QPocketBase::send(const QString& path, const QJsonObject params) 
 //     return QUrl{};
 // }
 
-QString QPocketBase::getFileToken() {
+QString PocketBase::getFileToken() {
     QJsonObject params;
     params.insert("method", "POST");
 
@@ -136,12 +136,12 @@ QString QPocketBase::getFileToken() {
     return QString(); // Placeholder
 }
 
-QString QPocketBase::baseUrl() const
+QString PocketBase::baseUrl() const
 {
     return this->m_baseurl;
 }
 
-void QPocketBase::setBaseUrl(const QString &newBaseUrl)
+void PocketBase::setBaseUrl(const QString &newBaseUrl)
 {
     if (m_baseurl == newBaseUrl)
         return;
@@ -151,12 +151,12 @@ void QPocketBase::setBaseUrl(const QString &newBaseUrl)
     qDebug() << m_baseurl;
 }
 
-QString QPocketBase::lang() const
+QString PocketBase::lang() const
 {
     return m_lang;
 }
 
-void QPocketBase::setLang(const QString &newLang)
+void PocketBase::setLang(const QString &newLang)
 {
     if (m_lang == newLang)
         return;

@@ -9,7 +9,7 @@
 #include "../models/utils/basemodel.h"
 #include "../models/utils/listresult.h"
 #include "../models/utils/schemafield.h"
-#include "../qpocketbase.h"
+#include "../client.h"
 
 BaseCrudService::BaseCrudService(QObject* parent)
     : BaseService(parent) {}
