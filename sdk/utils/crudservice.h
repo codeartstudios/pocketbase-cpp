@@ -15,7 +15,7 @@ class CrudService : public BaseCrudService {
     Q_OBJECT
 
 public:
-    explicit CrudService(std::shared_ptr<QPocketBase> client, QObject* parent = nullptr);
+    explicit CrudService(QPocketBase* client, QObject* parent = nullptr);
 
     QList<std::shared_ptr<BaseModel>> getFullList(int batch = 200, const QJsonObject& queryParams = QJsonObject());
     ListResult getList(int page = 1, int perPage = 30, const QJsonObject& queryParams = QJsonObject());

@@ -27,7 +27,8 @@ std::shared_ptr<RecordService> LocalAuthStore::model() const {
         return nullptr;
     }
     // Assuming Record has a method to deserialize from QVariant
-    return std::make_shared<RecordService>(data["model"].toMap());
+    // return std::make_shared<RecordService>(data["model"].toMap());
+    return std::make_shared<RecordService>(nullptr, "");
 }
 
 void LocalAuthStore::save(const QString& token, std::shared_ptr<RecordService> model) {
@@ -35,7 +36,7 @@ void LocalAuthStore::save(const QString& token, std::shared_ptr<RecordService> m
     data["token"] = token;
     if (model) {
         // Assuming Record has a method to serialize to QVariant
-        data["model"] = QVariant::fromValue(model->toVariantMap());
+        // data["model"] = QVariant::fromValue(model->toVariantMap());
     }
 
     storageSet(completeFilepath, data);

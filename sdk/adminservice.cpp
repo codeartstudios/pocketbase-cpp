@@ -11,7 +11,7 @@ std::shared_ptr<AdminModel> AdminAuthResponse::getAdmin() const {
     return admin;
 }
 
-AdminService::AdminService(std::shared_ptr<QPocketBase> client, QObject* parent)
+AdminService::AdminService(QPocketBase* client, QObject* parent)
     : CrudService(client, parent) {}
 
 std::shared_ptr<BaseModel> AdminService::decode(const QJsonObject& data) {
@@ -59,16 +59,24 @@ AdminAuthResponse AdminService::authResponse(const QJsonObject& responseData) {
     return AdminAuthResponse{"", nullptr};
 }
 
-AdminAuthResponse AdminService::authWithPassword(const QString& email, const QString& password, const QJsonObject& bodyParams, const QJsonObject& queryParams) {
-    QJsonObject params = bodyParams;
-    params.insert("identity", email);
-    params.insert("password", password);
-    auto reply = client->send(baseCrudPath() + "/auth-with-password", { {"method", "POST"}, {"params", queryParams}, {"body", params}, {"headers", QJsonObject{{"Authorization", ""}}} });
+QJsonObject AdminService::authWithPassword(const QString& email, const QString& password, const QJsonObject& bodyParams, const QJsonObject& queryParams) {
+    QJsonObject params, body, auth;
+    body.insert("identity", email);
+    body.insert("password", password);
+    params.insert("method", "POST");
+    params.insert("params", queryParams);
+    params.insert("body", body);
+    auth.insert("Authorization", "");
+    params.insert("headers", auth);
+
+    auto reply = client->send(baseCrudPath() + "/auth-with-password", params);
 
     connect(reply, &QNetworkReply::finished, this, [&](){
         // QJsonObject responseData
+        qDebug() << "[AdminService] Reply finished" << reply->readAll();
     });
     // return authResponse(responseData);
+    return QJsonObject();
 }
 
 AdminAuthResponse AdminService::authRefresh(const QJsonObject& bodyParams, const QJsonObject& queryParams) {

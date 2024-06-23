@@ -29,7 +29,7 @@ class AdminService : public CrudService {
     Q_OBJECT
 
 public:
-    explicit AdminService(std::shared_ptr<QPocketBase> client, QObject* parent = nullptr);
+    explicit AdminService(QPocketBase* client, QObject* parent = nullptr);
 
     std::shared_ptr<BaseModel> decode(const QJsonObject& data) override;
     QString baseCrudPath() const override;
@@ -38,7 +38,7 @@ public:
     bool deleteItem(const QString& id, const QJsonObject& queryParams = QJsonObject());
 
     AdminAuthResponse authResponse(const QJsonObject& responseData);
-    AdminAuthResponse authWithPassword(const QString& email, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
+    QJsonObject authWithPassword(const QString& email, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
     AdminAuthResponse authRefresh(const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
     bool requestPasswordReset(const QString& email, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
     bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());

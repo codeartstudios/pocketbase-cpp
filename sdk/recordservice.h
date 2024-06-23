@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QEventLoop>
 #include "qpocketbase.h"
 #include "./utils/crudservice.h"
 #include "models/recordmodel.hpp"
@@ -48,6 +49,9 @@ public:
     bool emailPassword;
     QList<AuthProviderInfo> authProviders;
 
+    // TEMPORARY
+    AuthMethodsList(){}
+
     AuthMethodsList(bool usernamePassword, bool emailPassword, const QList<AuthProviderInfo>& authProviders);
 };
 
@@ -55,7 +59,7 @@ class RecordService : public CrudService {
 public:
     QString collectionIdOrName;
 
-    RecordService(std::shared_ptr<QPocketBase> client, const QString& collectionIdOrName);
+    RecordService(QPocketBase* client, const QString& collectionIdOrName);
 
     std::shared_ptr<BaseModel> decode(const QJsonObject& data) override;
 
@@ -79,11 +83,11 @@ public:
 
     AuthMethodsList listAuthMethods(const QUrlQuery& queryParams = QUrlQuery());
 
-    RecordAuthResponse authWithPassword(const QString& usernameOrEmail, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    QNetworkReply* authWithPassword(const QString& usernameOrEmail, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    RecordAuthResponse authWithOAuth2(const QString& provider, const QString& code, const QString& codeVerifier, const QString& redirectUrl, const QJsonObject& createData = QJsonObject(), const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    QNetworkReply* authWithOAuth2(const QString& provider, const QString& code, const QString& codeVerifier, const QString& redirectUrl, const QJsonObject& createData = QJsonObject(), const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    RecordAuthResponse authRefresh(const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    QNetworkReply* authRefresh(const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
     bool requestEmailChange(const QString& newEmail, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 

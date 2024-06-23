@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef GLOBALUTILS_H
+#define GLOBALUTILS_H
 
 #include <QString>
 #include <QRegularExpression>
@@ -7,13 +7,13 @@
 #include <QUrlQuery>
 
 namespace Utils {
-QString camelToSnake(const QString &str) {
+inline QString camelToSnake(const QString &str) {
     QString result = str;
     result.replace(QRegularExpression("([a-z])([A-Z])"), "\\1_\\2").toLower();
     return result;
 }
 
-QJsonObject urlQueryToJson(const QUrlQuery &query) {
+inline QJsonObject urlQueryToJson(const QUrlQuery &query) {
     QJsonObject jsonObj;
     for (const QPair<QString, QString> &item : query.queryItems()) {
         jsonObj.insert(item.first, item.second);
@@ -22,4 +22,4 @@ QJsonObject urlQueryToJson(const QUrlQuery &query) {
 }
 }
 
-#endif // UTILS_H
+#endif // GLOBALUTILS_H

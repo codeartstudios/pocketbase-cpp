@@ -3,7 +3,7 @@
 #include "basecrudservice.h"
 #include "../models/utils/listresult.h"
 
-CrudService::CrudService(std::shared_ptr<QPocketBase> client, QObject* parent)
+CrudService::CrudService(QPocketBase* client, QObject* parent)
     : BaseCrudService(parent) { Q_UNUSED(client) }
 
 QList<std::shared_ptr<BaseModel>> CrudService::getFullList(int batch, const QJsonObject& queryParams) {

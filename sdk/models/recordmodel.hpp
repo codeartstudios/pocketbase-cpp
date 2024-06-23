@@ -35,10 +35,10 @@ public:
         QList<RecordModel> recordModels;
         if (data.type() == QVariant::List) {
             for (const auto &item : data.toList()) {
-                recordModels.append(RecordModel(item.toJsonObject()));
+                // recordModels.append(RecordModel(item.toJsonObject()));
             }
         } else if (data.type() == QVariant::Map) {
-            recordModels.append(RecordModel(data.toJsonObject()));
+            // recordModels.append(RecordModel(data.toJsonObject()));
         }
         return recordModels;
     }
@@ -46,7 +46,7 @@ public:
     void loadExpanded() {
         for (auto it = expand.begin(); it != expand.end(); ++it) {
             auto l = parseExpanded(it.value());
-            expand[it.key()] = QVariantList(l.begin(), l.end());
+            // expand[it.key()] = QVariantList(l.begin(), l.end());
         }
     }
 };

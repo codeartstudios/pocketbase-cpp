@@ -70,7 +70,7 @@ std::shared_ptr<BaseModel> BaseCrudService::_update(const QString& basePath, con
 }
 
 bool BaseCrudService::_delete(const QString& basePath, const QString& id, const QJsonObject& queryParams) {
-    client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "DELETE"}, {"params", queryParams} });
+    // client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "DELETE"}, {"params", queryParams} });
     return true;
 }
 
