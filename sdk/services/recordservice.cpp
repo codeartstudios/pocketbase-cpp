@@ -20,34 +20,36 @@ AuthProviderInfo::AuthProviderInfo(const QString &name, const QString &state, co
 AuthMethodsList::AuthMethodsList(bool usernamePassword, bool emailPassword, const QList<AuthProviderInfo> &authProviders)
     : usernamePassword(usernamePassword), emailPassword(emailPassword), authProviders(authProviders) {}
 
-RecordService::RecordService(QPocketBase* client, const QString &collectionIdOrName)
-    : CrudService(client), collectionIdOrName(collectionIdOrName) {}
+RecordService::RecordService(PocketBase* client, const QString &collectionIdOrName)
+    : CrudService(client),
+    m_collectionIdOrName(collectionIdOrName),
+    client(client) {}
 
-std::shared_ptr<BaseModel> RecordService::decode(const QJsonObject &data) {
-    // TODO
-    return std::make_shared<RecordModel>(data);
+// std::shared_ptr<BaseModel> RecordService::decode(const QJsonObject &data) {
+//     // TODO
+//     return std::make_shared<Record>(data);
+// }
+
+QString RecordService::baseCollectionPath() const {
+    return "/api/collections/" + QUrl::toPercentEncoding(m_collectionIdOrName);
 }
 
 QString RecordService::baseCrudPath() const {
     return baseCollectionPath() + "/records";
 }
 
-QString RecordService::baseCollectionPath() const {
-    return "/api/collections/" + QUrl::toPercentEncoding(collectionIdOrName);
-}
-
-QString RecordService::getFileUrl(const RecordModel &record, const QString &filename, const QUrlQuery &queryParams) const {
-    QString baseUrl = client->baseUrl();
-    if (baseUrl.endsWith("/")) {
-        baseUrl.chop(1);
-    }
-    QString result = QString("%1/api/files/%2/%3/%4")
-                         .arg(baseUrl, record.collectionId, record.getId(), filename);
-    if (!queryParams.isEmpty()) {
-        result += "?" + queryParams.toString();
-    }
-    return result;
-}
+// QString RecordService::getFileUrl(const Record &record, const QString &filename, const QUrlQuery &queryParams) const {
+//     QString baseUrl = client->baseUrl();
+//     if (baseUrl.endsWith("/")) {
+//         baseUrl.chop(1);
+//     }
+//     QString result = QString("%1/api/files/%2/%3/%4")
+//                          .arg(baseUrl, record.collectionId, record.getId(), filename);
+//     if (!queryParams.isEmpty()) {
+//         result += "?" + queryParams.toString();
+//     }
+//     return result;
+// }
 
 void RecordService::subscribe(std::function<void (const QVariant &)> callback) {
     // client->realtime()->subscribe(collectionIdOrName, callback);
@@ -69,7 +71,10 @@ void RecordService::unsubscribe(const QStringList &recordIds) {
     } */
 }
 
-RecordModel RecordService::update(const QString &id, const QJsonObject &bodyParams, const QUrlQuery &queryParams) {
+RecordModel RecordService::update(
+    const QString &id,
+    const QJsonObject &bodyParams,
+    const QUrlQuery &queryParams) {
     auto item = CrudService::update(id, bodyParams, Utils::urlQueryToJson(queryParams));
     try {
         // if (client->authStore()->model().collectionId != nullptr && item.id() == client->authStore()->model().id()) {
@@ -78,11 +83,13 @@ RecordModel RecordService::update(const QString &id, const QJsonObject &bodyPara
     } catch (...) {
     }
 
-    // TODO cast item to RecordModel
+    // TODO cast item to Record
     return RecordModel{QJsonObject{}};
 }
 
-bool RecordService::deleteRecord(const QString &id, const QUrlQuery &queryParams) {
+bool RecordService::deleteRecord(
+    const QString &id,
+    const QUrlQuery &queryParams) {
     bool success = CrudService::deleteOne(id, Utils::urlQueryToJson(queryParams));
     try {
         // if (success && client->authStore()->model().collectionId() != nullptr && id == client->authStore()->model().id()) {
@@ -95,7 +102,7 @@ bool RecordService::deleteRecord(const QString &id, const QUrlQuery &queryParams
 
 RecordAuthResponse RecordService::authResponse(const QJsonObject &responseData) {
     qDebug() << "Auth response ...";
-    // auto record = std::dynamic_pointer_cast<RecordModel>(decode(responseData["record"].toObject()));
+    // auto record = std::dynamic_pointer_cast<Record>(decode(responseData["record"].toObject()));
     // QString token = responseData["token"].toString();
     // if (!token.isEmpty()) { // && !record.isEmpty()) {
     //     client->authStore()->save(token, record);

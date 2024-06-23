@@ -10,11 +10,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QEventLoop>
-#include "client.h"
-#include "./utils/crudservice.h"
-#include "models/recordmodel.hpp"
-#include "globals.h"
-#include "baseauthstore.h"
+
+#include "crudservice.h"
+#include "../client.h"
+#include "../dtos/recordmodel.h"
 
 class RecordAuthResponse {
 public:
@@ -57,15 +56,13 @@ public:
 
 class RecordService : public CrudService {
 public:
-    QString collectionIdOrName;
+    RecordService(PocketBase* client, const QString& collectionIdOrName);
 
-    RecordService(QPocketBase* client, const QString& collectionIdOrName);
-
-    std::shared_ptr<BaseModel> decode(const QJsonObject& data) override;
-
-    QString baseCrudPath() const override;
+    // BaseModel* decode(const QJsonObject& data) override;
 
     QString baseCollectionPath() const;
+
+    QString baseCrudPath() const override;
 
     QString getFileUrl(const RecordModel& record, const QString& filename, const QUrlQuery& queryParams = QUrlQuery()) const;
 
@@ -100,6 +97,10 @@ public:
     bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
     bool confirmVerification(const QString& token, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+
+private:
+    QString m_collectionIdOrName;
+    PocketBase *client;
 };
 
 #endif // RECORDSERVICE_H

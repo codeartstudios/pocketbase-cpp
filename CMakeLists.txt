@@ -15,18 +15,19 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network)
 add_executable(pocketbase-cpp
   main.cpp
   sdk/client.h sdk/client.cpp
+  sdk/services/recordservice.h sdk/services/recordservice.cpp
+  sdk/services/basecrudservice.h sdk/services/basecrudservice.cpp
+  sdk/services/crudservice.h sdk/services/crudservice.cpp
+  sdk/services/baseservice.h
+  sdk/dtos/basemodel.h sdk/dtos/basemodel.cpp
+  sdk/dtos/listresult.h sdk/dtos/listresult.cpp
+
   # sdk/baseauthstore.h sdk/baseauthstore.cpp
   # sdk/adminservice.h sdk/adminservice.cpp
   # sdk/collectionservice.h sdk/collectionservice.cpp
-  # sdk/recordservice.h sdk/recordservice.cpp
   # sdk/localauthstore.h sdk/localauthstore.cpp
-  # sdk/utils/basecrudservice.h sdk/utils/basecrudservice.cpp
-  # sdk/models/utils/basemodel.h sdk/models/utils/basemodel.cpp
-  # sdk/models/utils/listresult.h sdk/models/utils/listresult.cpp
   # sdk/models/utils/schemafield.h sdk/models/utils/schemafield.cpp
-  # sdk/utils/baseservice.hpp
   # sdk/utils/clientresponseerror.h
-  # sdk/utils/crudservice.h sdk/utils/crudservice.cpp
   # sdk/models/AdminModel.h
   # sdk/models/collectionmodel.hpp
   # sdk/models/recordmodel.hpp

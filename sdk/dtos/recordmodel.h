@@ -1,11 +1,12 @@
-#ifndef RECORDModelMODEL_HPP
-#define RECORDModelMODEL_HPP
+#ifndef RECORDMODEL_HPP
+#define RECORDMODEL_HPP
 
 #include <QString>
 #include <QMap>
 #include <QVariant>
-#include "utils/basemodel.h"
-#include "../utils/utils.h"
+
+#include "../globals.h"
+#include "../dtos/basemodel.h"
 
 class RecordModel : public BaseModel {
 public:
@@ -51,4 +52,4 @@ public:
     }
 };
 
-#endif // RECORDModelMODEL_HPP
+#endif // RECORDMODEL_HPP
