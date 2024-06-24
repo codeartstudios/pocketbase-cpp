@@ -1,4 +1,5 @@
 #include "basecrudservice.h"
+#include "../client.h"
 
 BaseCrudService::BaseCrudService(QObject* parent)
     : BaseService(parent) {}
@@ -19,7 +20,11 @@ ListResult BaseCrudService::_getList(
     params["page"] = page;
     params["perPage"] = perPage;
 
-    QJsonObject response_data; // = client->send(basePath, { {"method", "GET"}, {"params", params} }).toObject();
+    QJsonObject payload;
+    payload.insert("method", "GET");
+    payload.insert("params", params);
+
+    QJsonObject response_data = client->send(basePath, payload);
     QList<BaseModel*> items;
     if (response_data.contains("items")) {
         QJsonArray itemsArray = response_data["items"].toArray();
@@ -40,8 +45,13 @@ BaseModel* BaseCrudService::_getOne(
     const QString& basePath,
     const QString& id,
     const QJsonObject& queryParams) {
-    // return decode(client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "GET"}, {"params", queryParams} }).toObject());
-    return new BaseModel();
+
+    QJsonObject payload;
+    payload.insert("method", "GET");
+    payload.insert("params", queryParams);
+
+    auto one = client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), payload);
+    return new BaseModel(one);
 }
 
 BaseModel* BaseCrudService::_getFirstListItem(

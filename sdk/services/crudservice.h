@@ -6,7 +6,9 @@
 #include <QList>
 
 #include "basecrudservice.h"
-#include "../client.h"
+
+// Forward declaration
+class PocketBase;
 
 
 class CrudService : public BaseCrudService {

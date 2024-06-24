@@ -6,7 +6,7 @@ BaseModel::BaseModel(const QJsonObject& data, QObject* parent)
 }
 
 QString BaseModel::toString() const {
-    return QString("<%1: %2>").arg(this->metaObject()->className()).arg(id);
+    return QString("<%1: %2>").arg(this->metaObject()->className()).arg(m_id);
 }
 
 QString BaseModel::repr() const {
@@ -14,25 +14,26 @@ QString BaseModel::repr() const {
 }
 
 void BaseModel::load(const QJsonObject& data) {
-    id = data["id"].toString("");
-    created = toDateTime(data["created"].toString(""));
-    updated = toDateTime(data["updated"].toString(""));
+    m_id = data["id"].toString("");
+    m_created = toDateTime(data["created"].toString(""));
+    m_updated = toDateTime(data["updated"].toString(""));
+    m_data = data;
 }
 
 bool BaseModel::isNew() const {
-    return id.isEmpty();
+    return m_id.isEmpty();
 }
 
 QString BaseModel::getId() const {
-    return id;
+    return m_id;
 }
 
 QDateTime BaseModel::getCreated() const {
-    return created;
+    return m_created;
 }
 
 QDateTime BaseModel::getUpdated() const {
-    return updated;
+    return m_updated;
 }
 
 QDateTime BaseModel::toDateTime(const QString& datetimeStr) const {

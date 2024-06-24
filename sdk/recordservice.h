@@ -13,6 +13,7 @@
 
 #include "crudservice.h"
 #include "../dtos/recordmodel.h"
+#include "../client.h"
 
 // Forward declaration
 class PocketBase;
@@ -20,9 +21,9 @@ class PocketBase;
 class RecordAuthResponse {
 public:
     QString token;
-    RecordModel* record;
+    RecordModel record;
 
-    RecordAuthResponse(const QString& token, RecordModel* record);
+    RecordAuthResponse(const QString& token, const RecordModel& record);
 
     bool isValid() const;
 
@@ -82,11 +83,11 @@ public:
 
     AuthMethodsList listAuthMethods(const QUrlQuery& queryParams = QUrlQuery());
 
-    RecordAuthResponse authWithPassword(const QString& usernameOrEmail, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    QNetworkReply* authWithPassword(const QString& usernameOrEmail, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    RecordAuthResponse authWithOAuth2(const QString& provider, const QString& code, const QString& codeVerifier, const QString& redirectUrl, const QJsonObject& createData = QJsonObject(), const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    QNetworkReply* authWithOAuth2(const QString& provider, const QString& code, const QString& codeVerifier, const QString& redirectUrl, const QJsonObject& createData = QJsonObject(), const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    RecordAuthResponse authRefresh(const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    QNetworkReply* authRefresh(const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
     bool requestEmailChange(const QString& newEmail, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
@@ -94,15 +95,15 @@ public:
 
     bool requestPasswordReset(const QString& email, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    bool requestVerification(const QString& email);
+    bool requestVerification(const QString& email, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
     bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    bool confirmVerification(const QString& token);
+    bool confirmVerification(const QString& token, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
 private:
     QString m_collectionIdOrName;
-    PocketBase *client;
+    // PocketBase *client;
 };
 
 #endif // RECORDSERVICE_H

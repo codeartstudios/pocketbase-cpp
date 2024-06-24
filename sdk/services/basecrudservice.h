@@ -11,7 +11,6 @@
 #include <QNetworkReply>
 
 #include "baseservice.h"
-// #include "../client.h"
 #include "../dtos/basemodel.h"
 #include "../dtos/listresult.h"
 

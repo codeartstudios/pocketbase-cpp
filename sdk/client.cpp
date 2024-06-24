@@ -1,34 +1,29 @@
 #include "client.h"
+#include "services/recordservice.h"
+#include "services/baseauthstore.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
+    m_baseurl(baseUrl),
+    m_lang(lang),
     m_timeout(timeout),
     m_networkManager(new QNetworkAccessManager(this)),
-    m_lang(lang),
-    a(12),
-    b(13)
-{
-    setBaseUrl(baseUrl);
-    qDebug() << baseUrl;
+    m_authStore(new BaseAuthStore("", nullptr, this)) {}
+
+RecordService* PocketBase::collection(const QString& idOrName) {
+    if (!m_recordServices.contains(idOrName)) {
+        m_recordServices[idOrName] = new RecordService(this, idOrName);
+    }
+
+    return m_recordServices[idOrName];
 }
-
-// std::shared_ptr<RecordService> PocketBase::collection(const QString& idOrName) {
-//     qDebug() << "Collection init [" << idOrName << "]";
-//     if (!recordServices.contains(idOrName)) {
-//         qDebug() << "[RecordService] No record, creating new one ...";
-//         recordServices[idOrName] = std::make_shared<RecordService>(this, idOrName);
-//         qDebug() << "[RecordService] New instance created ...";
-//     }
-
-//     return recordServices[idOrName];
-// }
 
 QString PocketBase::filter(const QString &expr, const QMap<QString, QVariant> &query) {
     if (query.isEmpty()) {
         return expr;
     }
 
-    for( const auto key : query.keys()) {
+    for( const auto &key : query.keys()) {
         auto value = query.value( key );
 
         // if ( value.isNull() || value is num || value is bool) {
@@ -47,35 +42,29 @@ QString PocketBase::filter(const QString &expr, const QMap<QString, QVariant> &q
 }
 
 QUrl PocketBase::buildUrl(const QString& path) {
-    qDebug() << path;
-    qDebug() << "--";
-    // qDebug() << m_baseurl;
-    qDebug() << "--";
+    QUrl url(m_baseurl);
 
-    QUrl url("http://127.0.0.1:5740/"); // m_baseurl);
     if (!url.path().endsWith("/")) {
         url.setPath(url.path() + "/");
     }
 
-    url.setPath(url.path() + path);
+    if(path.startsWith("/"))
+        url.setPath(url.path() + path.mid(1));
+    else
+        url.setPath(url.path() + path);
+
     return url;
 }
 
-QNetworkReply* PocketBase::send(const QString& path, const QJsonObject params) {
-    qDebug() << path;
-    qDebug() << baseUrl();
-    qDebug() << "Accessing the baseURL";
-    setLang("something");
-    qDebug() << "Lang set";
-    a = 5;
-    qDebug() << "Getting a";
-    qDebug() << a;
-    qDebug() << b;
-    qDebug() << m_timeout;
-    qDebug() << m_lang;
-    qDebug() << QString(m_baseurl);
+BaseAuthStore *PocketBase::authStore() const { return m_authStore; }
 
+QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);
+    qDebug() << "[PocketBase] Making a (" << params.value("method").toString() << ") request to '" << url.toString() << "'";
+
+
+    QNetworkRequest request(url);
+    request.setRawHeader("Content-Type", "application/json");
 
     // If there are query parameters, pass them into the URL
     if( params.contains("query") && !params.value("query").isNull() ) {
@@ -83,13 +72,12 @@ QNetworkReply* PocketBase::send(const QString& path, const QJsonObject params) {
         /// TODO
     }
 
-
-    QNetworkRequest request(url);
-
-    // Add headers and other request configuration
-    // if (m_authStore->token().isEmpty() && !request.hasRawHeader("Authorization")) {
-    //     request.setRawHeader("Authorization", m_authStore->token().toUtf8());
-    // }
+    if( params.contains("headers") ) {
+        auto headers = params.value("headers").toObject();
+        if( headers.contains("auth") && headers.value("auth").toBool() ) {
+            request.setRawHeader("Authorization", "Bearer " + m_authStore->token().toUtf8());
+        }
+    }
 
     // QJsonDocument jsonDoc(reqConfig);
     // QByteArray jsonData = jsonDoc.toJson();
@@ -99,13 +87,30 @@ QNetworkReply* PocketBase::send(const QString& path, const QJsonObject params) {
 
     if(params.value("method").toString() == "GET") {
         reply = m_networkManager->get(request);
-    } else if(params.value("method").toString() == "GET") {
+    } else if(params.value("method").toString() == "POST") {
         reply = m_networkManager->post(request, doc.toJson());
     } else {
         qDebug() << "Unhandled: " << params.value("method").toString();
+        return QJsonObject();
     }
 
-    return reply;
+    QEventLoop wait_loop;
+    connect(reply, &QNetworkReply::finished, &wait_loop, &QEventLoop::quit);
+    wait_loop.exec();
+
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QJsonDocument resJsonDoc = QJsonDocument::fromJson(reply->readAll());
+    // qDebug() << "res: " << resJsonDoc;
+
+    QJsonObject responseObject;
+    responseObject.insert("statusCode", statusCode);
+    responseObject.insert("data", resJsonDoc.object());
+
+    if( reply->error() != QNetworkReply::NoError ) {
+        responseObject.insert("error", reply->errorString());
+    }
+
+    return responseObject;
 }
 
 // QUrl PocketBase::getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams) {
@@ -125,11 +130,11 @@ QString PocketBase::getFileToken() {
     QJsonObject params;
     params.insert("method", "POST");
 
-    QNetworkReply* reply = send("/api/files/token", params);
+    auto reply = send("/api/files/token", params);
 
-    auto data = reply->readAll().data();
+    // auto data = reply->readAll().data();
 
-    qDebug() << "Reply [File Token] " << data;
+    //qDebug() << "Reply [File Token] " << data;
 
     // Handle reply and extract token
 

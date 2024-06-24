@@ -3,21 +3,21 @@
 
 #include <QObject>
 #include <QString>
-#include <memory>
+#include <QJsonDocument>
 
-class RecordService;
-class AdminService;
+class RecordModel;
 
 class BaseAuthStore : public QObject
 {
     Q_OBJECT
 public:
-    explicit BaseAuthStore(const QString& token = "", std::shared_ptr<RecordService> baseModel = nullptr, QObject* parent = nullptr);
+    explicit BaseAuthStore(const QString& token = "", RecordModel* baseModel = nullptr, QObject* parent = nullptr);
 
     QString token() const;
-    std::shared_ptr<RecordService> model() const;
+    RecordModel* model() const;
+    bool isValid() const;
 
-    void save(const QString& token = "", std::shared_ptr<RecordService> model = nullptr);
+    void save(const QString& token = "", RecordModel* model = nullptr);
     void clear();
 
     // TODO
@@ -28,7 +28,7 @@ signals:
 
 private:
     QString m_baseToken;
-    std::shared_ptr<RecordService> m_baseModel;
+    RecordModel* m_baseModel;
 };
 
 #endif // BASEAUTHSTORE_H

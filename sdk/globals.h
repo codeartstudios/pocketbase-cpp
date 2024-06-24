@@ -9,7 +9,7 @@
 namespace Utils {
 inline QString camelToSnake(const QString &str) {
     QString result = str;
-    result.replace(QRegularExpression("([a-z])([A-Z])"), "\\1_\\2").toLower();
+    auto _ = result.replace(QRegularExpression("([a-z])([A-Z])"), "\\1_\\2").toLower();
     return result;
 }
 
@@ -19,6 +19,17 @@ inline QJsonObject urlQueryToJson(const QUrlQuery &query) {
         jsonObj.insert(item.first, item.second);
     }
     return jsonObj;
+}
+
+inline QByteArray base64UrlDecode(const QString& base64Url) {
+    QString base64 = base64Url;
+    base64.replace('-', '+').replace('_', '/');
+
+    while (base64.length() % 4 != 0) {
+        base64.append('=');
+    }
+
+    return QByteArray::fromBase64(base64.toUtf8());
 }
 }
 

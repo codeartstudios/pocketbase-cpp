@@ -15,6 +15,9 @@
 #include <QJsonDocument>
 #include <QDebug>
 
+class RecordService;
+class BaseAuthStore;
+
 class PocketBase : public QObject
 {
     Q_OBJECT
@@ -24,13 +27,15 @@ public:
     Q_PROPERTY(QString baseUrl READ baseUrl WRITE setBaseUrl NOTIFY baseUrlChanged FINAL)
     Q_PROPERTY(QString lang READ lang WRITE setLang NOTIFY langChanged FINAL)
 
-    // RecordService* collection(const QString& idOrName);
+    RecordService* collection(const QString& idOrName);
     // BaseAuthStore* authStore() { return m_authStore; }
-    QNetworkReply* send(const QString& path, const QJsonObject params);
+    QJsonObject send(const QString& path, const QJsonObject params);
 
     QString filter(const QString& expr, const QMap<QString, QVariant>& query);
     QString getFileToken();
     QUrl buildUrl(const QString& path);
+
+    BaseAuthStore* authStore() const;
 
     QString baseUrl() const;
     void setBaseUrl(const QString &newBaseUrl);
@@ -40,16 +45,17 @@ public:
 
 signals:
     void baseUrlChanged();
-
     void langChanged();
-
     void requestFinished(QNetworkReply* reply);
 
 private:
-    int a = 100, b = 12331332;
     QString m_baseurl, m_lang;
     int m_timeout;
+
     QNetworkAccessManager* m_networkManager;
+    BaseAuthStore* m_authStore;
+
+    QMap<QString, RecordService*> m_recordServices;
 };
 
 typedef PocketBase Client;

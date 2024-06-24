@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QJsonObject>
 
-#include "../client.h"
+class PocketBase;
 
 class BaseService : public QObject {
     Q_OBJECT

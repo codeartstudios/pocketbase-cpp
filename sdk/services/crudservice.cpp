@@ -1,4 +1,5 @@
 #include "crudservice.h"
+#include "../client.h"
 
 CrudService::CrudService(PocketBase* client, QObject* parent)
     : BaseCrudService(parent) { Q_UNUSED(client) }
