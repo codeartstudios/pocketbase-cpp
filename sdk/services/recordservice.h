@@ -50,9 +50,6 @@ public:
     bool emailPassword;
     QList<AuthProviderInfo> authProviders;
 
-    // TEMPORARY
-    AuthMethodsList(){}
-
     AuthMethodsList(bool usernamePassword, bool emailPassword, const QList<AuthProviderInfo>& authProviders);
 };
 
@@ -88,15 +85,15 @@ public:
 
     RecordAuthResponse authRefresh(const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
-    bool requestEmailChange(const QString& newEmail, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    bool requestEmailChange(const QString& newEmail);
 
-    bool confirmEmailChange(const QString& token, const QString& password, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    bool confirmEmailChange(const QString& token, const QString& password);
 
     bool requestPasswordReset(const QString& email, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
 
     bool requestVerification(const QString& email);
 
-    bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm);
 
     bool confirmVerification(const QString& token);
 

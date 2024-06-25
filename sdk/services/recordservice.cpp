@@ -116,8 +116,6 @@ bool RecordService::deleteRecord(
 }
 
 RecordAuthResponse RecordService::authResponse(const QJsonObject &responseData) {
-    // qDebug() << "[RecordService] Auth response";
-
     // Ensure response is well formed before creating the RecordAuthResponse
     if( responseData.contains("data") &&
         responseData["data"].toObject().contains("record") &&
@@ -128,7 +126,6 @@ RecordAuthResponse RecordService::authResponse(const QJsonObject &responseData) 
 
         if (!token.isEmpty() && !record->isEmpty()) {
             client->authStore()->save(token, record);
-            // qDebug() << "[RecordService] Token Saved!";
         }
 
         return RecordAuthResponse(token, record);
@@ -138,25 +135,38 @@ RecordAuthResponse RecordService::authResponse(const QJsonObject &responseData) 
 }
 
 AuthMethodsList RecordService::listAuthMethods(const QUrlQuery &queryParams) {
-    // QJsonObject responseData = client->send(baseCollectionPath() + "/auth-methods", "GET", queryParams);
-    // bool usernamePassword = responseData["usernamePassword"].toBool();
-    // bool emailPassword = responseData["emailPassword"].toBool();
-    // QList<AuthProviderInfo> authProviders;
-    // for (const auto& provider : responseData["authProviders"].toArray()) {
-    //     authProviders.append(AuthProviderInfo(
-    //         provider["name"].toString(),
-    //         provider["state"].toString(),
-    //         provider["codeVerifier"].toString(),
-    //         provider["codeChallenge"].toString(),
-    //         provider["codeChallengeMethod"].toString(),
-    //         provider["authUrl"].toString()));
-    // }
-    return AuthMethodsList(); // usernamePassword, emailPassword, authProviders);
+    QJsonObject query, payload;
+    query.insert("query", queryParams.toString());
+    payload.insert("method", "POST");
+    payload.insert("query", query);
+
+    QJsonObject responseData = client->send(baseCollectionPath() + "/auth-methods", payload);
+    qDebug() << "[List Auth Methods] Response: " << responseData;
+
+    QList<AuthProviderInfo> authProviders;
+
+    if( responseData.value("statusCode").toInt() == 200 ) {
+        responseData = responseData["data"].toObject();
+
+        bool usernamePassword = responseData["usernamePassword"].toBool();
+        bool emailPassword = responseData["emailPassword"].toBool();
+
+        for ( const auto& provider : responseData["authProviders"].toArray() ) {
+            authProviders.append(AuthProviderInfo(
+                provider.toObject().value("name").toString(),
+                provider.toObject().value("state").toString(),
+                provider.toObject().value("codeVerifier").toString(),
+                provider.toObject().value("codeChallenge").toString(),
+                provider.toObject().value("codeChallengeMethod").toString(),
+                provider.toObject().value("authUrl").toString()));
+        }
+        return AuthMethodsList(usernamePassword, emailPassword, authProviders);
+    } else {
+        return AuthMethodsList(false, false, authProviders);
+    }
 }
 
 RecordAuthResponse RecordService::authWithPassword(const QString &usernameOrEmail, const QString &password, const QJsonObject &bodyParams, const QUrlQuery &queryParams) {
-    // qDebug() << "[RecordService] Authenticate with password";
-
     QJsonObject body, params;
     body.insert("identity", usernameOrEmail);
     body.insert("password", password);
@@ -164,10 +174,7 @@ RecordAuthResponse RecordService::authWithPassword(const QString &usernameOrEmai
     params.insert("method", "POST");
     params.insert("body", body);
 
-    // qDebug() << "[RecordService] Request parameters: " << params;
-
     QJsonObject httpResponse = client->send(baseCollectionPath() + "/auth-with-password", params);
-
     return authResponse(httpResponse);
 }
 
@@ -193,19 +200,36 @@ RecordAuthResponse RecordService::authRefresh(const QJsonObject &bodyParams, con
     return authResponse(responseData);
 }
 
-bool RecordService::requestEmailChange(const QString &newEmail, const QJsonObject &bodyParams, const QUrlQuery &queryParams) {
-    QJsonObject params = bodyParams;
-    params.insert("newEmail", newEmail);
-    // client->send(baseCollectionPath() + "/request-email-change", "POST", queryParams, params);
-    return true;
+bool RecordService::requestEmailChange(const QString &newEmail) {
+    QJsonObject payload, body, headers;
+    body["newEmail"] = newEmail;
+    payload.insert("method", "POST");
+    payload.insert("body", body);
+    headers.insert("auth", true);
+    payload.insert("headers", headers);
+
+    // 400 - "Failed to authenticate."
+    // 401 -  "The request requires valid record authorization token to be set."
+    // 403 - "The authorized record model is not allowed to perform this action.
+
+    auto jsonResponse = client->send(baseCollectionPath() + "/request-email-change", payload);
+    qDebug() << "[Request Email Change] Response: " << jsonResponse;
+    return jsonResponse.value("statusCode").toInt() == 204;
 }
 
-bool RecordService::confirmEmailChange(const QString &token, const QString &password, const QJsonObject &bodyParams, const QUrlQuery &queryParams) {
-    QJsonObject params = bodyParams;
-    params.insert("token", token);
-    params.insert("password", password);
-    // client->send(baseCollectionPath() + "/confirm-email-change", "POST", queryParams, params);
-    return true;
+bool RecordService::confirmEmailChange(const QString &token, const QString &password) {
+    QJsonObject payload, body, headers;
+    body["token"] = token;
+    body["password"] = password;
+    payload.insert("method", "POST");
+    payload.insert("body", body);
+
+    // 204 - Null
+    // 400 - "Failed to authenticate."
+
+    auto jsonResponse = client->send(baseCollectionPath() + "/confirm-email-change", payload);
+    qDebug() << "[Confirm Email Change] Response: " << jsonResponse;
+    return jsonResponse.value("statusCode").toInt() == 204;
 }
 
 bool RecordService::requestPasswordReset(const QString &email, const QJsonObject &bodyParams, const QUrlQuery &queryParams) {
@@ -232,13 +256,17 @@ bool RecordService::requestVerification(const QString &email) {
     return jsonResponse.value("statusCode").toInt() == 204;
 }
 
-bool RecordService::confirmPasswordReset(const QString &passwordResetToken, const QString &password, const QString &passwordConfirm, const QJsonObject &bodyParams, const QUrlQuery &queryParams) {
-    QJsonObject params = bodyParams;
-    params.insert("token", passwordResetToken);
-    params.insert("password", password);
-    params.insert("passwordConfirm", passwordConfirm);
-    // client->send(baseCollectionPath() + "/confirm-password-reset", "POST", queryParams, params);
-    return true;
+bool RecordService::confirmPasswordReset(const QString &passwordResetToken, const QString &password, const QString &passwordConfirm) {
+    QJsonObject payload, headers, body;
+    body["token"] = passwordResetToken;
+    body["password"] = password;
+    body["passwordConfirm"] = passwordConfirm;
+    payload.insert("method", "POST");
+    payload.insert("body", body);
+
+    auto jsonResponse = client->send(baseCollectionPath() + "/confirm-password-reset", payload);
+    qDebug() << "[Confirm Password Reset] Response: " << jsonResponse;
+    return jsonResponse.value("statusCode").toInt() == 204;
 }
 
 bool RecordService::confirmVerification(const QString &token) {
@@ -248,6 +276,7 @@ bool RecordService::confirmVerification(const QString &token) {
     payload.insert("body", body);
     headers.insert("auth", true);
     payload.insert("headers", headers);
+
     auto jsonResponse = client->send(baseCollectionPath() + "/confirm-verification", payload);
     qDebug() << "Confirm Verification Response: " << jsonResponse;
     return jsonResponse.value("statusCode").toInt() == 204;

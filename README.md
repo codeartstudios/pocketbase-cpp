@@ -5,23 +5,23 @@ NON OFFICIAL & EXPERIMENTAL C++ SDK for interacting with the [PocketBase Web API
 
 Work still in progress, many breaking changes without notice as we try to match the official SDKs. Contributions are highly welcome.
 
-So far, 
+# Implemented Features 
 - [ ] Admin Service
-- [ ] Records Service (partially)
+- [-] Records Service (partially)
+  - [X] Auth With Password
+  - [ ] Auth with OAuth2
+  - [X] Auth Refresh
+  - [X] Request Email Verification
+  - [X] Confirm Email Verification
+  - [X] Request Password Reset
+  - [X] Confirm Password Reset
+  - [X] Request Email Change
+  - [X] Confirm Email Change
+  - [-] List auth methods
+  - [ ] List OAuth2 accounts
+  - [ ] Unlink OAuth2 account 
 - [ ] Collections Service
 - [ ] File Service
-
-Segments copied from the Dart SDK, will be updated later ...
-- [Installation](#installation)
-- [Caveats](#caveats)
-    - [File upload](#file-upload)
-    - [RecordModel](#recordmodel)
-    - [Error handling](#error-handling)
-    - [AuthStore](#authstore)
-    - [Binding filter parameters](#binding-filter-parameters)
-- [Services](#services)
-- [Limitations](#limitations)
-- [Development](#development)
 
 
 ## Installation

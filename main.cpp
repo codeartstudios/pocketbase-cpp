@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     PocketBase client{"http://127.0.0.1:5740/"};
 
     // Auth with password
-    client.collection("users")->authWithPassword("test@user.com", "123456789");
+    // auto user = client.collection("users")->authWithPassword("EMAIL", "PASSWORD");
     // qDebug() << client.authStore()->isValid() << user.isValid();
     // qDebug() << client.authStore()->token();
     // qDebug() << client.authStore()->model()->getId();
@@ -21,11 +21,19 @@ int main(int argc, char *argv[])
     //qDebug() << refreshUser.isValid();
 
     // Request Verification
-    // client.collection("users")->requestVerification("allankoech.ke@gmail.com");
+    // qDebug() << client.collection("users")->requestVerification("EMAIL");
 
-    qDebug() << client.collection("users")->confirmVerification("12345");
+    //qDebug() << client.collection("users")->confirmVerification("CODE");
 
-    qDebug() << client.collection("users")->requestPasswordReset("allankoech.ke@gmail.com");
+    // qDebug() << client.collection("users")->requestPasswordReset("EMAIL");
+
+    // qDebug() << client.collection("users")->confirmPasswordReset("TOKEN", "PASSWORD", "CONFIRM PASSWORD");
+
+    // qDebug() << client.collection("users")->requestEmailChange("EMAIL");
+
+    // qDebug() << client.collection("users")->confirmEmailChange("TOKEN", "PASSWORD");
+
+    // client.collection("users")->listAuthMethods();
 
     return a.exec();
 }
