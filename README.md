@@ -20,6 +20,16 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [ ] List auth methods
   - [ ] List OAuth2 accounts
   - [ ] Unlink OAuth2 account 
+- [ ] Crud Service
+  - [X] Search/List
+    - [X] GetList
+    - [X] GetFullList
+    - [X] GetFistListItem
+  - [X] View (getOne)
+  - [X] Create
+  - [X] Update
+  - [X] Delete
+  - [ ] Realtime (pending)
 - [ ] Collections Service
 - [ ] File Service
 

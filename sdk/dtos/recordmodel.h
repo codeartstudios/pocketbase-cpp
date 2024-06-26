@@ -15,8 +15,11 @@ public:
     QMap<QString, QVariant> expand;
 
     RecordModel(const QJsonObject &data) {
-        // qDebug() << "[Data Record Model] " << data;
         load(data);
+    }
+
+    RecordModel(BaseModel* baseModel) {
+        load(baseModel->data());
     }
 
     bool isEmpty() const { return expand.isEmpty(); }

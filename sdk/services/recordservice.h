@@ -71,9 +71,9 @@ public:
 
     void unsubscribe(const QStringList& recordIds);
 
-    RecordModel update(const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QUrlQuery& queryParams = QUrlQuery());
+    RecordModel update(const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
 
-    bool deleteRecord(const QString& id, const QUrlQuery& queryParams = QUrlQuery());
+    bool deleteRecord(const QString& id);
 
     RecordAuthResponse authResponse(const QJsonObject& responseData);
 

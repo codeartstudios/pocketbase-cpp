@@ -33,7 +33,7 @@ protected:
     BaseModel* _getFirstListItem(const QString& basePath, const QString& filter, const QJsonObject& queryParams = QJsonObject());
     BaseModel* _create(const QString& basePath, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
     BaseModel* _update(const QString& basePath, const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
-    bool _delete(const QString& basePath, const QString& id, const QJsonObject& queryParams = QJsonObject());
+    bool _delete(const QString& basePath, const QString& id);
 
 private:
     QList<BaseModel*> requestFullList(QList<BaseModel*>& result, const QString& basePath, int page, int batchSize, const QJsonObject& queryParams);

@@ -28,6 +28,6 @@ BaseModel* CrudService::update(const QString& id, const QJsonObject& bodyParams,
     return _update(baseCrudPath(), id, bodyParams, queryParams);
 }
 
-bool CrudService::deleteOne(const QString& id, const QJsonObject& queryParams) {
-    return _delete(baseCrudPath(), id, queryParams);
+bool CrudService::deleteOne(const QString& id) {
+    return _delete(baseCrudPath(), id);
 }

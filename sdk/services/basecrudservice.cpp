@@ -31,25 +31,20 @@ ListResult BaseCrudService::_getList(
     QJsonObject data = responseData.value("data").toObject();
     QList<BaseModel*> items;
 
-    if( responseData.value("statusCode").toInt() == 200 ) {
-        if ( data.contains("items") ) {
-            QJsonArray itemsArray = data["items"].toArray();
-            for (const QJsonValue& item : itemsArray) {
-                items.append(decode(item.toObject()));
-            }
+    if ( data.contains("items") ) {
+        QJsonArray itemsArray = data["items"].toArray();
+        for (const QJsonValue& item : itemsArray) {
+            items.append(decode(item.toObject()));
         }
-
-        return ListResult(
-            data["page"].toInt(),
-            data["perPage"].toInt(),
-            data["totalItems"].toInt(),
-            data["totalPages"].toInt(),
-            items
-            );
     }
 
-    // Empty ListResult
-    return ListResult( 0,0,0,0,items );
+    return ListResult(
+        data["page"].toInt(),
+        data["perPage"].toInt(),
+        data["totalItems"].toInt(),
+        data["totalPages"].toInt(),
+        items
+        );
 }
 
 BaseModel* BaseCrudService::_getOne(
@@ -62,12 +57,7 @@ BaseModel* BaseCrudService::_getOne(
     payload.insert("query", queryParams);
 
     auto one = client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), payload);
-    // qDebug() << "[One] Response: " << one;
-
-    if( one.value("statusCode").toInt() == 200 )
-        return new BaseModel(one.value("data").toObject());
-    else
-        return new BaseModel();
+    return new BaseModel(one.value("data").toObject());
 }
 
 BaseModel* BaseCrudService::_getFirstListItem(
@@ -84,7 +74,6 @@ BaseModel* BaseCrudService::_getFirstListItem(
         throw ClientResponseError("The requested resource wasn't found.", 404);
     }
 
-    // qDebug() << "Data: " << result.items().first()->data();
     return result.items().first();
 }
 
@@ -92,8 +81,13 @@ BaseModel* BaseCrudService::_create(
     const QString& basePath,
     const QJsonObject& bodyParams,
     const QJsonObject& queryParams) {
-    // return decode(client->send(basePath, { {"method", "POST"}, {"params", queryParams}, {"body", bodyParams} }).toObject());
-    return new BaseModel();
+    QJsonObject payload;
+    payload.insert("method", "POST");
+    if( !bodyParams.isEmpty() ) payload.insert("body", bodyParams);
+    if( !queryParams.isEmpty() ) payload.insert("query", queryParams);
+
+    auto responseJSON = client->send(basePath, payload);
+    return decode(responseJSON["data"].toObject());
 }
 
 BaseModel* BaseCrudService::_update(
@@ -101,16 +95,22 @@ BaseModel* BaseCrudService::_update(
     const QString& id,
     const QJsonObject& bodyParams,
     const QJsonObject& queryParams) {
-    // return decode(client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "PATCH"}, {"params", queryParams}, {"body", bodyParams} }).toObject());
-    return new BaseModel();
+    QJsonObject payload;
+    payload.insert("method", "PATCH");
+    if( !bodyParams.isEmpty() ) payload.insert("body", bodyParams);
+    if( !queryParams.isEmpty() ) payload.insert("query", queryParams);
+    auto responseJSON = client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), payload);
+
+    return decode(responseJSON.value("data").toObject());
 }
 
 bool BaseCrudService::_delete(
     const QString& basePath,
-    const QString& id,
-    const QJsonObject& queryParams) {
-    // client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), { {"method", "DELETE"}, {"params", queryParams} });
-    return true;
+    const QString& id ) {
+    QJsonObject payload;
+    payload.insert("method", "DELETE");
+    auto responseJSON = client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), payload);
+    return responseJSON["statusCode"].toInt() == 204;
 }
 
 QList<BaseModel*> BaseCrudService::requestFullList(

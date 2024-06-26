@@ -23,7 +23,7 @@ public:
     BaseModel* getOne(const QString& id, const QJsonObject& queryParams = QJsonObject());
     BaseModel* create(const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
     BaseModel* update(const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
-    bool deleteOne(const QString& id, const QJsonObject& queryParams = QJsonObject());
+    bool deleteOne(const QString& id);
 
 protected:
     virtual QString baseCrudPath() const = 0;

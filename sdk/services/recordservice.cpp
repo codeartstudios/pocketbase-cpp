@@ -88,29 +88,32 @@ void RecordService::unsubscribe(const QStringList &recordIds) {
 RecordModel RecordService::update(
     const QString &id,
     const QJsonObject &bodyParams,
-    const QUrlQuery &queryParams) {
-    auto item = CrudService::update(id, bodyParams, Utils::urlQueryToJson(queryParams));
+    const QJsonObject &queryParams) {
+    auto item = CrudService::update(id, bodyParams, queryParams);
+
+    // Create a record model out of a basemodel
+    auto record = RecordModel(item);
+
     try {
         if (client->authStore()->model()->collectionId != nullptr && item->getId() == client->authStore()->model()->getId()) {
-            // client->authStore()->save(client->authStore()->token(), item);
+            client->authStore()->save(client->authStore()->token(), &record);
         }
     } catch (...) {
     }
 
-    // TODO cast item to Record
-    return RecordModel{QJsonObject{}};
+    return record;
 }
 
 bool RecordService::deleteRecord(
-    const QString &id,
-    const QUrlQuery &queryParams) {
-    bool success = CrudService::deleteOne(id, Utils::urlQueryToJson(queryParams));
+    const QString &id) {
+    bool success = CrudService::deleteOne(id);
     try {
-        // if (success && client->authStore()->model().collectionId() != nullptr && id == client->authStore()->model().id()) {
-        //     client->authStore()->clear();
-        // }
+        if (success && client->authStore()->model()->collectionId != nullptr && id == client->authStore()->model()->getId()) {
+            client->authStore()->clear();
+        }
     } catch (...) {
     }
+
     return success;
 }
 

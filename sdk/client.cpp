@@ -1,6 +1,7 @@
 #include "client.h"
 #include "services/recordservice.h"
 #include "services/baseauthstore.h"
+#include "services/clientresponseerror.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
@@ -80,11 +81,13 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
              << params.value("method").toString()
              << ") request to '" << request.url().toString() << "'";
 
-    if( params.contains("headers") ) {
-        auto headers = params.value("headers").toObject();
-        if( headers.contains("auth") && headers.value("auth").toBool() ) {
-            request.setRawHeader("Authorization", "Bearer " + m_authStore->token().toUtf8());
-        }
+    // If no auth disabled by user
+    if( params.contains("headers") &&
+        params.value("headers").toObject().contains("auth") &&
+        !params.value("headers").toObject().value("auth").toBool()) {}
+    // Explicitly pass the auth header unless specified to be ignored
+    else {
+        request.setRawHeader("Authorization", "Bearer " + m_authStore->token().toUtf8());
     }
 
     QNetworkReply* reply;
@@ -92,11 +95,27 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
 
     if(params.value("method").toString() == "GET") {
         reply = m_networkManager->get(request);
-    } else if(params.value("method").toString() == "POST") {
+    }
+
+    else if(params.value("method").toString() == "POST") {
         reply = m_networkManager->post(request, doc.toJson());
-    } else {
+    }
+
+    else if(params.value("method").toString() == "PATCH" ) {
+        reply = m_networkManager->sendCustomRequest(request, "PATCH", doc.toJson());
+    }
+
+    else if(params.value("method").toString() == "PUT") {
+        reply = m_networkManager->put(request, doc.toJson());
+    }
+
+    else if(params.value("method").toString() == "DELETE") {
+        reply = m_networkManager->deleteResource(request);
+    }
+
+    else {
+        throw ClientResponseError("Unhandled Method", 404);
         qDebug() << "Unhandled: " << params.value("method").toString();
-        return QJsonObject();
     }
 
     QEventLoop wait_loop;
@@ -105,7 +124,6 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
 
     int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     QJsonDocument resJsonDoc = QJsonDocument::fromJson(reply->readAll());
-    // qDebug() << "res: " << resJsonDoc;
 
     QJsonObject responseObject;
     responseObject.insert("statusCode", statusCode);
@@ -113,6 +131,11 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
 
     if( reply->error() != QNetworkReply::NoError ) {
         responseObject.insert("error", reply->errorString());
+    }
+
+    if( statusCode >= 400 ) {
+        QString msg = resJsonDoc.object()["message"].toString();
+        throw ClientResponseError(msg, statusCode, request.url().toString());
     }
 
     return responseObject;
