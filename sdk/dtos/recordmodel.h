@@ -15,7 +15,7 @@ public:
     QMap<QString, QVariant> expand;
 
     RecordModel(const QJsonObject &data) {
-        qDebug() << "[Data Record Model] " << data;
+        // qDebug() << "[Data Record Model] " << data;
         load(data);
     }
 

@@ -29,14 +29,14 @@ public:
     virtual QString getId() const;
     virtual QDateTime getCreated() const;
     virtual QDateTime getUpdated() const;
+    virtual QJsonObject toJSON() const { return m_data; };
+    static QDateTime toDateTime(const QString& datetimeStr);
 
 protected:
     QString m_id;
     QDateTime m_created;
     QDateTime m_updated;
     QJsonObject m_data;
-
-    QDateTime toDateTime(const QString& datetimeStr) const;
 };
 
 #endif // BASEMODEL_H

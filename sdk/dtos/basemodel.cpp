@@ -36,6 +36,6 @@ QDateTime BaseModel::getUpdated() const {
     return m_updated;
 }
 
-QDateTime BaseModel::toDateTime(const QString& datetimeStr) const {
+QDateTime BaseModel::toDateTime(const QString &datetimeStr) {
     return QDateTime::fromString(datetimeStr, Qt::ISODate);
 }

@@ -1,8 +1,9 @@
 #include "basecrudservice.h"
 #include "../client.h"
+#include "clientresponseerror.h"
 
-BaseCrudService::BaseCrudService(QObject* parent)
-    : BaseService(parent) {}
+BaseCrudService::BaseCrudService(PocketBase* client, QObject* parent)
+    : BaseService(parent), client(client) {}
 
 QList<BaseModel*> BaseCrudService::_getFullList(
     const QString& basePath,
@@ -15,30 +16,40 @@ QList<BaseModel*> BaseCrudService::_getFullList(
 ListResult BaseCrudService::_getList(
     const QString& basePath, int page,
     int perPage,
+    bool skipTotal,
     const QJsonObject& queryParams) {
     QJsonObject params = queryParams;
-    params["page"] = page;
-    params["perPage"] = perPage;
+    params["page"] = QString::number(page);
+    params["perPage"] = QString::number(perPage);
+    params["skipTotal"] = skipTotal ? "true":"false";
 
     QJsonObject payload;
     payload.insert("method", "GET");
-    payload.insert("params", params);
+    payload.insert("query", params);
 
-    QJsonObject response_data = client->send(basePath, payload);
+    QJsonObject responseData = client->send(basePath, payload);
+    QJsonObject data = responseData.value("data").toObject();
     QList<BaseModel*> items;
-    if (response_data.contains("items")) {
-        QJsonArray itemsArray = response_data["items"].toArray();
-        for (const QJsonValue& item : itemsArray) {
-            items.append(decode(item.toObject()));
+
+    if( responseData.value("statusCode").toInt() == 200 ) {
+        if ( data.contains("items") ) {
+            QJsonArray itemsArray = data["items"].toArray();
+            for (const QJsonValue& item : itemsArray) {
+                items.append(decode(item.toObject()));
+            }
         }
+
+        return ListResult(
+            data["page"].toInt(),
+            data["perPage"].toInt(),
+            data["totalItems"].toInt(),
+            data["totalPages"].toInt(),
+            items
+            );
     }
-    return ListResult(
-        response_data["page"].toInt(),
-        response_data["perPage"].toInt(),
-        response_data["totalItems"].toInt(),
-        response_data["totalPages"].toInt(),
-        items
-        );
+
+    // Empty ListResult
+    return ListResult( 0,0,0,0,items );
 }
 
 BaseModel* BaseCrudService::_getOne(
@@ -48,26 +59,33 @@ BaseModel* BaseCrudService::_getOne(
 
     QJsonObject payload;
     payload.insert("method", "GET");
-    payload.insert("params", queryParams);
+    payload.insert("query", queryParams);
 
     auto one = client->send(QString("%1/%2").arg(basePath, QUrl::toPercentEncoding(id)), payload);
-    return new BaseModel(one);
+    // qDebug() << "[One] Response: " << one;
+
+    if( one.value("statusCode").toInt() == 200 )
+        return new BaseModel(one.value("data").toObject());
+    else
+        return new BaseModel();
 }
 
 BaseModel* BaseCrudService::_getFirstListItem(
     const QString& basePath,
     const QString& filter,
     const QJsonObject& queryParams) {
-    QJsonObject params = queryParams;
+    QJsonObject payload, params = queryParams;
     params["filter"] = filter;
     params["$cancelKey"] = "one_by_filter_" + basePath + "_" + filter;
 
-    // ListResult result = getList(basePath, 1, 1, params);
-    // if (result.items().isEmpty()) {
-    //     throw ClientResponseError("The requested resource wasn't found.", 404);
-    // }
-    // return result.items().first();
-    return new BaseModel();
+    ListResult result = _getList(basePath, 1, 1, false, params);
+
+    if (result.items().isEmpty()) {
+        throw ClientResponseError("The requested resource wasn't found.", 404);
+    }
+
+    // qDebug() << "Data: " << result.items().first()->data();
+    return result.items().first();
 }
 
 BaseModel* BaseCrudService::_create(
@@ -100,10 +118,12 @@ QList<BaseModel*> BaseCrudService::requestFullList(
     const QString& basePath,
     int page, int batchSize,
     const QJsonObject& queryParams) {
-    ListResult list = _getList(basePath, page, batchSize, queryParams);
+    ListResult list = _getList(basePath, page, batchSize, !false, queryParams);
     result.append(list.items());
+
     if (!list.items().isEmpty() && list.totalItems() > result.size()) {
         return requestFullList(result, basePath, page + 1, batchSize, queryParams);
     }
+
     return result;
 }

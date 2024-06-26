@@ -7,7 +7,7 @@ Work still in progress, many breaking changes without notice as we try to match 
 
 # Implemented Features 
 - [ ] Admin Service
-- [-] Records Service (partially)
+- [ ] Records Service (partially)
   - [X] Auth With Password
   - [ ] Auth with OAuth2
   - [X] Auth Refresh
@@ -17,7 +17,7 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [X] Confirm Password Reset
   - [X] Request Email Change
   - [X] Confirm Email Change
-  - [-] List auth methods
+  - [ ] List auth methods
   - [ ] List OAuth2 accounts
   - [ ] Unlink OAuth2 account 
 - [ ] Collections Service

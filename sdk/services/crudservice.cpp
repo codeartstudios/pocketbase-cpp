@@ -2,14 +2,14 @@
 #include "../client.h"
 
 CrudService::CrudService(PocketBase* client, QObject* parent)
-    : BaseCrudService(parent) { Q_UNUSED(client) }
+    : BaseCrudService(client, parent) {}
 
 QList<BaseModel*> CrudService::getFullList(int batch, const QJsonObject& queryParams) {
     return _getFullList(baseCrudPath(), batch, queryParams);
 }
 
-ListResult CrudService::getList(int page, int perPage, const QJsonObject& queryParams) {
-    return _getList(baseCrudPath(), page, perPage, queryParams);
+ListResult CrudService::getList(int page, int perPage, bool skipTotal, const QJsonObject& queryParams) {
+    return _getList(baseCrudPath(), page, perPage, skipTotal, queryParams);
 }
 
 BaseModel* CrudService::getFirstListItem(const QString& filter, const QJsonObject& queryParams) {

@@ -41,7 +41,6 @@ RecordService::RecordService(PocketBase* client, const QString &collectionIdOrNa
     client(client) {}
 
 BaseModel* RecordService::decode(const QJsonObject &data) {
-    // TODO
     return new RecordModel(data);
 }
 

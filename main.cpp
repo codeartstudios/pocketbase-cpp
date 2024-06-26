@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     PocketBase client{"http://127.0.0.1:5740/"};
 
     // Auth with password
-    // auto user = client.collection("users")->authWithPassword("EMAIL", "PASSWORD");
+    auto user = client.collection("users")->authWithPassword("lalan2205@gmail.com", "123456789");
     // qDebug() << client.authStore()->isValid() << user.isValid();
     // qDebug() << client.authStore()->token();
     // qDebug() << client.authStore()->model()->getId();
@@ -34,6 +34,26 @@ int main(int argc, char *argv[])
     // qDebug() << client.collection("users")->confirmEmailChange("TOKEN", "PASSWORD");
 
     // client.collection("users")->listAuthMethods();
+
+    // auto items = client.collection("temperature")->getList(2,30);
+    // qDebug() << "Items: " << items.items().size();
+
+    QJsonObject filter;
+    filter["sort"] = "-created";
+    filter["filter"] = "created>'2024-06-22 10:28'";
+    auto items = client.collection("temperature")->getFullList(500, filter);
+    qDebug() << "Items: " << items.size();
+
+    for(const auto &item : items) {
+        qDebug() << item->data()["created"].toString();
+    }
+
+    // auto item = client.collection("temperature")->getOne("8oc6rhllnbekc0y");
+    // qDebug() << "One Item: " << item->data();
+
+    // auto d = client.collection("temperature")->getFirstListItem("value=2121");
+
+    // qDebug() << "Result -> " << d->data();
 
     return a.exec();
 }

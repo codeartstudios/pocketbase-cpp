@@ -60,17 +60,25 @@ BaseAuthStore *PocketBase::authStore() const { return m_authStore; }
 
 QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);
-    qDebug() << "[PocketBase] Making a (" << params.value("method").toString() << ") request to '" << url.toString() << "'";
-
-
-    QNetworkRequest request(url);
+    QNetworkRequest request;
     request.setRawHeader("Content-Type", "application/json");
 
     // If there are query parameters, pass them into the URL
     if( params.contains("query") && !params.value("query").isNull() ) {
-        // QUrlQuery q;
-        /// TODO
+        QUrlQuery q;
+
+        for( const auto& key : params.value("query").toObject().keys() ) {
+            QString value = params.value("query").toObject().value(key).toString();
+            q.addQueryItem(key, value);
+        }
+
+        url.setQuery(q);
     }
+
+    request.setUrl(url);
+    qDebug() << "\n[PocketBase] Making a ("
+             << params.value("method").toString()
+             << ") request to '" << request.url().toString() << "'";
 
     if( params.contains("headers") ) {
         auto headers = params.value("headers").toObject();
@@ -78,9 +86,6 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
             request.setRawHeader("Authorization", "Bearer " + m_authStore->token().toUtf8());
         }
     }
-
-    // QJsonDocument jsonDoc(reqConfig);
-    // QByteArray jsonData = jsonDoc.toJson();
 
     QNetworkReply* reply;
     QJsonDocument doc(params.value("body").toObject());

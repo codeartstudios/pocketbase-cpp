@@ -19,7 +19,7 @@ add_executable(pocketbase-cpp
   sdk/services/recordservice.h sdk/services/recordservice.cpp
   sdk/services/basecrudservice.h sdk/services/basecrudservice.cpp
   sdk/services/crudservice.h sdk/services/crudservice.cpp
-  sdk/services/baseservice.h
+  sdk/services/baseservice.h sdk/services/clientresponseerror.h
   sdk/services/baseauthstore.h sdk/services/baseauthstore.cpp
   sdk/dtos/basemodel.h sdk/dtos/basemodel.cpp
   sdk/dtos/listresult.h sdk/dtos/listresult.cpp
@@ -29,7 +29,6 @@ add_executable(pocketbase-cpp
   # sdk/collectionservice.h sdk/collectionservice.cpp
   # sdk/localauthstore.h sdk/localauthstore.cpp
   # sdk/models/utils/schemafield.h sdk/models/utils/schemafield.cpp
-  # sdk/utils/clientresponseerror.h
   # sdk/models/AdminModel.h
   # sdk/models/collectionmodel.hpp
 )
