@@ -17,6 +17,7 @@
 
 class RecordService;
 class BaseAuthStore;
+class CollectionService;
 
 class PocketBase : public QObject
 {
@@ -31,7 +32,6 @@ public:
     // BaseAuthStore* authStore() { return m_authStore; }
     QJsonObject send(const QString& path, const QJsonObject params);
 
-    QString filter(const QString& expr, const QMap<QString, QVariant>& query);
     QString getFileToken();
     QUrl buildUrl(const QString& path);
 
@@ -54,6 +54,7 @@ private:
 
     QNetworkAccessManager* m_networkManager;
     BaseAuthStore* m_authStore;
+    CollectionService* m_collectionService;
 
     QMap<QString, RecordService*> m_recordServices;
 };

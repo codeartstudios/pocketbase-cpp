@@ -21,16 +21,15 @@ add_executable(pocketbase-cpp
   sdk/services/crudservice.h sdk/services/crudservice.cpp
   sdk/services/baseservice.h sdk/services/clientresponseerror.h
   sdk/services/baseauthstore.h sdk/services/baseauthstore.cpp
+  sdk/services/collectionservice.h sdk/services/collectionservice.cpp
+  sdk/services/adminservice.h sdk/services/adminservice.cpp
   sdk/dtos/basemodel.h sdk/dtos/basemodel.cpp
   sdk/dtos/listresult.h sdk/dtos/listresult.cpp
-  sdk/dtos/recordmodel.h
+  sdk/dtos/recordmodel.h sdk/dtos/collectionmodel.h
+  sdk/dtos/AdminModel.h
 
-  # sdk/adminservice.h sdk/adminservice.cpp
-  # sdk/collectionservice.h sdk/collectionservice.cpp
   # sdk/localauthstore.h sdk/localauthstore.cpp
   # sdk/models/utils/schemafield.h sdk/models/utils/schemafield.cpp
-  # sdk/models/AdminModel.h
-  # sdk/models/collectionmodel.hpp
 )
 target_link_libraries(pocketbase-cpp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 

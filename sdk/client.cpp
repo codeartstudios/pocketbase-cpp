@@ -2,6 +2,7 @@
 #include "services/recordservice.h"
 #include "services/baseauthstore.h"
 #include "services/clientresponseerror.h"
+#include "services/collectionservice.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
@@ -9,7 +10,8 @@ PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout,
     m_lang(lang),
     m_timeout(timeout),
     m_networkManager(new QNetworkAccessManager(this)),
-    m_authStore(new BaseAuthStore("", nullptr, this)) {}
+    m_authStore(new BaseAuthStore("", nullptr, this)),
+    m_collectionService(new CollectionService(this, this)) {}
 
 RecordService* PocketBase::collection(const QString& idOrName) {
     if (!m_recordServices.contains(idOrName)) {
@@ -17,29 +19,6 @@ RecordService* PocketBase::collection(const QString& idOrName) {
     }
 
     return m_recordServices[idOrName];
-}
-
-QString PocketBase::filter(const QString &expr, const QMap<QString, QVariant> &query) {
-    if (query.isEmpty()) {
-        return expr;
-    }
-
-    for( const auto &key : query.keys()) {
-        auto value = query.value( key );
-
-        // if ( value.isNull() || value is num || value is bool) {
-        //     value = value.toString();
-        // } else if (value is DateTime) {
-        //     value = "'${value.toUtc().toIso8601String().replaceFirst("T", " ")}'";
-        // } else if (value is String) {
-        //     value = "'${value.replaceAll("'", "\\'")}'";
-        // } else {
-        //     value = "'${jsonEncode(value).replaceAll("'", "\\'")}'";
-        // }
-        // expr = expr.replaceAll("{:$key}", value.toString());
-    }
-
-    return expr;
 }
 
 QUrl PocketBase::buildUrl(const QString& path) {
