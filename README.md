@@ -36,7 +36,7 @@ Work still in progress, many breaking changes without notice as we try to match 
 - [ ] Backup Service
 - [ ] Log Service
 - [ ] Realtime Service
-- [ ] Settings Service
+- [X] Settings Service
 
 
 ## Installation
