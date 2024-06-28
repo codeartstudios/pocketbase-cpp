@@ -23,13 +23,11 @@ add_executable(pocketbase-cpp
   sdk/services/baseauthstore.h sdk/services/baseauthstore.cpp
   sdk/services/collectionservice.h sdk/services/collectionservice.cpp
   sdk/services/adminservice.h sdk/services/adminservice.cpp
+  sdk/services/healthservice.h sdk/services/healthservice.cpp
   sdk/dtos/basemodel.h sdk/dtos/basemodel.cpp
   sdk/dtos/listresult.h sdk/dtos/listresult.cpp
   sdk/dtos/recordmodel.h sdk/dtos/collectionmodel.h
   sdk/dtos/AdminModel.h
-
-  # sdk/localauthstore.h sdk/localauthstore.cpp
-  # sdk/models/utils/schemafield.h sdk/models/utils/schemafield.cpp
 )
 target_link_libraries(pocketbase-cpp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 
@@ -40,12 +38,13 @@ install(TARGETS pocketbase-cpp
 )
 
 
+# sdk/localauthstore.h sdk/localauthstore.cpp
+# sdk/models/utils/schemafield.h sdk/models/utils/schemafield.cpp
 # sdk/utils/sseclient.h sdk/utils/sseclient.cpp
 # sdk/fileservice.h sdk/fileservice.cpp
 # sdk/realtimeservice.h sdk/realtimeservice.cpp
 # sdk/settingsservice.h sdk/settingsservice.cpp
 # sdk/logservice.h sdk/logservice.cpp
-# sdk/healthservice.h sdk/healthservice.cpp
 # sdk/backupservice.h sdk/backupservice.cpp
 # sdk/models/backupmodel.hpp
 # sdk/models/fileuploadmodel.hpp

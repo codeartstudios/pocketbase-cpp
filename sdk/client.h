@@ -19,6 +19,7 @@ class AdminService;
 class RecordService;
 class BaseAuthStore;
 class CollectionService;
+class HealthService;
 
 class PocketBase : public QObject
 {
@@ -33,6 +34,9 @@ public:
     RecordService* collection(const QString& idOrName);
     CollectionService* collections() const;
     BaseAuthStore* authStore() const;
+    HealthService* health() const;
+
+
     QJsonObject send(const QString& path, const QJsonObject params);
 
     QString getFileToken();
@@ -57,6 +61,7 @@ private:
     BaseAuthStore* m_authStore;
     CollectionService* m_collectionService;
     AdminService* m_adminService;
+    HealthService* m_healthService;
 
     QMap<QString, RecordService*> m_recordServices;
 };

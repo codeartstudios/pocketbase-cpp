@@ -6,7 +6,7 @@ NON OFFICIAL & EXPERIMENTAL C++ SDK for interacting with the [PocketBase Web API
 Work still in progress, many breaking changes without notice as we try to match the official SDKs. Contributions are highly welcome.
 
 # Implemented Features 
-- [ ] Admin Service
+- [X] Admin Service
 - [ ] Records Service (partially)
   - [X] Auth With Password
   - [ ] Auth with OAuth2
@@ -30,7 +30,7 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [X] Update
   - [X] Delete
   - [ ] Realtime (pending)
-- [ ] Collections Service
+- [X] Collections Service
 - [ ] File Service
 
 

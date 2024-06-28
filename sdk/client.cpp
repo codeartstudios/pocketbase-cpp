@@ -4,16 +4,18 @@
 #include "services/clientresponseerror.h"
 #include "services/collectionservice.h"
 #include "services/adminservice.h"
+#include "services/healthservice.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
     m_baseurl(baseUrl),
     m_lang(lang),
     m_timeout(timeout),
-    m_networkManager(new QNetworkAccessManager(this)),
-    m_authStore(new BaseAuthStore("", nullptr, this)),
-    m_collectionService(new CollectionService(this, this)),
-    m_adminService(new AdminService(this, this)) {}
+    m_networkManager( new QNetworkAccessManager(this) ),
+    m_authStore( new BaseAuthStore("", nullptr, this) ),
+    m_collectionService( new CollectionService(this, this) ),
+    m_adminService( new AdminService(this, this) ),
+    m_healthService( new HealthService(this, this) ) {}
 
 AdminService *PocketBase::admins() const { return m_adminService; }
 
@@ -43,6 +45,8 @@ QUrl PocketBase::buildUrl(const QString& path) {
 }
 
 BaseAuthStore *PocketBase::authStore() const { return m_authStore; }
+
+HealthService *PocketBase::health() const { return m_healthService; }
 
 QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);
