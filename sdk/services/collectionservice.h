@@ -13,8 +13,8 @@ public:
     explicit CollectionService(PocketBase* client, QObject *parent = nullptr);
 
     QString baseCrudPath() const override;
-    bool import(QJsonArray& collections, bool deleteMissing = false,
-                QJsonObject headers = {}, QJsonObject query = {} );
+    bool import(const QJsonArray& collections, bool deleteMissing = false,
+                const QJsonObject& params = {} );
     BaseModel* decode(const QJsonObject& data) override;
 private:
     PocketBase* client;

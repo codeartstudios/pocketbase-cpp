@@ -15,6 +15,7 @@
 #include <QJsonDocument>
 #include <QDebug>
 
+class AdminService;
 class RecordService;
 class BaseAuthStore;
 class CollectionService;
@@ -28,14 +29,14 @@ public:
     Q_PROPERTY(QString baseUrl READ baseUrl WRITE setBaseUrl NOTIFY baseUrlChanged FINAL)
     Q_PROPERTY(QString lang READ lang WRITE setLang NOTIFY langChanged FINAL)
 
+    AdminService* admins() const;
     RecordService* collection(const QString& idOrName);
-    // BaseAuthStore* authStore() { return m_authStore; }
+    CollectionService* collections() const;
+    BaseAuthStore* authStore() const;
     QJsonObject send(const QString& path, const QJsonObject params);
 
     QString getFileToken();
     QUrl buildUrl(const QString& path);
-
-    BaseAuthStore* authStore() const;
 
     QString baseUrl() const;
     void setBaseUrl(const QString &newBaseUrl);
@@ -55,6 +56,7 @@ private:
     QNetworkAccessManager* m_networkManager;
     BaseAuthStore* m_authStore;
     CollectionService* m_collectionService;
+    AdminService* m_adminService;
 
     QMap<QString, RecordService*> m_recordServices;
 };

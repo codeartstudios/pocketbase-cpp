@@ -12,6 +12,10 @@ public:
         load(data);
     }
 
+    AdminModel(BaseModel* baseModel) {
+        load(baseModel->data());
+    }
+
     int getAvatar() const {
         return m_avatar;
     }

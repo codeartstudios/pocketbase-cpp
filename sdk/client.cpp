@@ -3,6 +3,7 @@
 #include "services/baseauthstore.h"
 #include "services/clientresponseerror.h"
 #include "services/collectionservice.h"
+#include "services/adminservice.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
@@ -11,7 +12,10 @@ PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout,
     m_timeout(timeout),
     m_networkManager(new QNetworkAccessManager(this)),
     m_authStore(new BaseAuthStore("", nullptr, this)),
-    m_collectionService(new CollectionService(this, this)) {}
+    m_collectionService(new CollectionService(this, this)),
+    m_adminService(new AdminService(this, this)) {}
+
+AdminService *PocketBase::admins() const { return m_adminService; }
 
 RecordService* PocketBase::collection(const QString& idOrName) {
     if (!m_recordServices.contains(idOrName)) {
@@ -20,6 +24,8 @@ RecordService* PocketBase::collection(const QString& idOrName) {
 
     return m_recordServices[idOrName];
 }
+
+CollectionService *PocketBase::collections() const { return m_collectionService; }
 
 QUrl PocketBase::buildUrl(const QString& path) {
     QUrl url(m_baseurl);

@@ -33,8 +33,9 @@ BaseModel* AdminService::update(const QString& id, const QJsonObject& params) {
     auto record = new RecordModel(item);
 
     try {
-        if (client->authStore()->model()->collectionId.isNull() &&
-            item->getId() == client->authStore()->model()->getId()) {
+        qDebug() << "Update token ...";
+        if (item->getId() == client->authStore()->model()->getId()) {
+            qDebug() << "Updating record ...";
             client->authStore()->save(client->authStore()->token(), record);
         }
     } catch (...) {
@@ -44,16 +45,15 @@ BaseModel* AdminService::update(const QString& id, const QJsonObject& params) {
     return record;
 }
 
-bool AdminService::deleteItem(const QString& id) {
+bool AdminService::deleteOne(const QString& id) {
     auto ok = CrudService::deleteOne(id);
 
     try {
-        if (ok && client->authStore()->model()->collectionId.isNull() &&
-            id == client->authStore()->model()->getId()) {
+        if (ok && id == client->authStore()->model()->getId()) {
             client->authStore()->clear();
         }
     } catch (...) {
-        // Handle exceptions
+        qDebug() << "Exeception on Admin Service deleteOne";
     }
 
     return ok;
@@ -62,50 +62,55 @@ bool AdminService::deleteItem(const QString& id) {
 AdminAuthResponse AdminService::authResponse(const QJsonObject& responseData) {
     QJsonObject adminData = responseData.value("admin").toObject();
     QString token = responseData.value("token").toString();
-    auto admin = decode(adminData);
+    auto admin = new AdminModel(decode(adminData));
+
     if (!token.isEmpty() && admin) {
-        // client->authStore()->save(token, admin);
+        client->authStore()->save(token, new RecordModel(admin));
     }
+
     return AdminAuthResponse(token, admin);
 }
 
-QJsonObject AdminService::authWithPassword(const QString& email, const QString& password, const QJsonObject& params) {
-    QJsonObject payload, body, auth;
+AdminAuthResponse AdminService::authWithPassword(const QString& email, const QString& password, const QJsonObject& params) {
+    QJsonObject body, payload;
     body.insert("identity", email);
     body.insert("password", password);
-    params.insert("method", "POST");
-    params.insert("params", queryParams);
-    params.insert("body", body);
-    auth.insert("Authorization", "");
-    params.insert("headers", auth);
 
-    auto reply = client->send(baseCrudPath() + "/auth-with-password", params);
+    payload.insert("method", "POST");
+    payload.insert("body", body);
+    if( !params.isEmpty() ) payload.insert("query", params);
 
-    connect(reply, &QNetworkReply::finished, this, [&](){
-        // QJsonObject responseData
-        qDebug() << "[AdminService] Reply finished" << reply->readAll();
-    });
-    // return authResponse(responseData);
-    return QJsonObject();
+    QJsonObject httpResponse = client->send(baseCrudPath() + "/auth-with-password", payload);
+    return authResponse(httpResponse.value("data").toObject());
 }
 
-AdminAuthResponse AdminService::authRefresh(const QJsonObject& bodyParams, const QJsonObject& queryParams) {
-    // QJsonObject responseData = client->send(baseCrudPath() + "/auth-refresh", { {"method", "POST"}, {"params", queryParams}, {"body", bodyParams} });
-    return authResponse(QJsonObject{});
+AdminAuthResponse AdminService::authRefresh(const QJsonObject& params) {
+    QJsonObject payload = params;
+    payload.insert("method", "POST");
+    QJsonObject responseData = client->send(baseCrudPath() + "/auth-refresh", payload);
+    return authResponse(responseData);
 }
 
-bool AdminService::requestPasswordReset(const QString& email, const QJsonObject& bodyParams, const QJsonObject& queryParams) {
-    QJsonObject params = bodyParams;
-    params.insert("email", email);
-    // client->send(baseCrudPath() + "/request-password-reset", { {"method", "POST"}, {"params", queryParams}, {"body", params} });
-    return true;
+bool AdminService::requestPasswordReset(const QString& email) {
+    QJsonObject payload, body;
+    body["email"] = email;
+    payload.insert("method", "POST");
+    payload.insert("body", body);
+
+    auto jsonResponse = client->send(baseCrudPath() + "/request-password-reset", payload);
+    qDebug() << "[Admin Password Reset] Response: " << jsonResponse;
+    return jsonResponse.value("statusCode").toInt() == 204;
 }
 
-bool AdminService::confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm, const QJsonObject& bodyParams, const QJsonObject& queryParams) {
-    QJsonObject params = bodyParams;
-    params.insert("token", passwordResetToken);
-    params.insert("password", password);
-    params.insert("passwordConfirm", passwordConfirm);
-    // client->send(baseCrudPath() + "/confirm-password-reset", { {"method", "POST"}, {"params", queryParams}, {"body", params} });
-    return true;
+bool AdminService::confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm) {
+    QJsonObject payload, headers, body;
+    body["token"] = passwordResetToken;
+    body["password"] = password;
+    body["passwordConfirm"] = passwordConfirm;
+    payload.insert("method", "POST");
+    payload.insert("body", body);
+
+    auto jsonResponse = client->send(baseCrudPath() + "/confirm-password-reset", payload);
+    qDebug() << "[Admin Confirm Password Reset] Response: " << jsonResponse;
+    return jsonResponse.value("statusCode").toInt() == 204;
 }

@@ -32,12 +32,13 @@ public:
     QString baseCrudPath() const override;
 
     BaseModel* update(const QString& id, const QJsonObject& params = QJsonObject());
-    bool deleteItem(const QString& id);
+    bool deleteOne(const QString& id);
 
     AdminAuthResponse authResponse(const QJsonObject& responseData);
-    QJsonObject authWithPassword(const QString& email, const QString& password, const QJsonObject& params = QJsonObject());
+    AdminAuthResponse authWithPassword(const QString& email, const QString& password, const QJsonObject& params = QJsonObject());
     AdminAuthResponse authRefresh(const QJsonObject& params = QJsonObject());
-    bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm, const QJsonObject& params = QJsonObject());
+    bool requestPasswordReset(const QString& email);
+    bool confirmPasswordReset(const QString& passwordResetToken, const QString& password, const QString& passwordConfirm);
 
 private:
     PocketBase* client;

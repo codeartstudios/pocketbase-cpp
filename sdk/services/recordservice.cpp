@@ -195,7 +195,6 @@ RecordAuthResponse RecordService::authRefresh(const QJsonObject &bodyParams, con
     QJsonObject payload, headers;
     payload.insert("method", "POST");
     payload.insert("body", bodyParams);
-    headers.insert("auth", true);
     payload.insert("headers", headers);
 
     QJsonObject responseData = client->send(baseCollectionPath() + "/auth-refresh", payload);
