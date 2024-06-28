@@ -2,8 +2,7 @@
 #include "../client.h"
 
 HealthService::HealthService(PocketBase* client, QObject *parent)
-    : QObject{parent}, client(client)
-{}
+    : QObject{parent}, client(client) {}
 
 QJsonObject HealthService::check(const QJsonObject &params) {
     QJsonObject payload=params;

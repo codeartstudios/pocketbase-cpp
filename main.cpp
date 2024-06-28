@@ -7,6 +7,7 @@
 #include "sdk/services/collectionservice.h"
 #include "sdk/dtos/adminmodel.h"
 #include "sdk/services/healthservice.h"
+#include "sdk/services/settingsservice.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,12 +16,12 @@ int main(int argc, char *argv[])
     PocketBase client{"http://127.0.0.1:5740/"};
 
     // ADMIN
-    // try {
-    //     auto user = client.admins()->authWithPassword("admin@admin.com", "12345678901");
-    //     qDebug() << "Admin User: " << user.getToken() << "\t: " << user.getAdmin()->data();
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
+    try {
+        auto user = client.admins()->authWithPassword("admin@admin.com", "12345678901");
+        qDebug() << "Admin User: " << user.getToken() << "\t: " << user.getAdmin()->data();
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
 
     // try {
     //     QJsonObject body;
@@ -112,9 +113,17 @@ int main(int argc, char *argv[])
     }
 
     // Health check
+    // try {
+    //     auto health = client.health()->check();
+    //     qDebug() << "New Admin User: " << health;
+    // } catch (ClientResponseError e) {
+    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    // }
+
+    // Health check
     try {
-        auto health = client.health()->check();
-        qDebug() << "New Admin User: " << health;
+        auto health = client.settings()->getAll();
+        qDebug() << "Settings: " << health;
     } catch (ClientResponseError e) {
         qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
     }

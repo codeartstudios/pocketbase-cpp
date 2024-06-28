@@ -32,6 +32,11 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [ ] Realtime (pending)
 - [X] Collections Service
 - [ ] File Service
+- [X] Health Service
+- [ ] Backup Service
+- [ ] Log Service
+- [ ] Realtime Service
+- [ ] Settings Service
 
 
 ## Installation

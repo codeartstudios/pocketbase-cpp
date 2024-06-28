@@ -24,6 +24,7 @@ add_executable(pocketbase-cpp
   sdk/services/collectionservice.h sdk/services/collectionservice.cpp
   sdk/services/adminservice.h sdk/services/adminservice.cpp
   sdk/services/healthservice.h sdk/services/healthservice.cpp
+  sdk/services/settingsservice.h sdk/services/settingsservice.cpp
   sdk/dtos/basemodel.h sdk/dtos/basemodel.cpp
   sdk/dtos/listresult.h sdk/dtos/listresult.cpp
   sdk/dtos/recordmodel.h sdk/dtos/collectionmodel.h
@@ -43,7 +44,6 @@ install(TARGETS pocketbase-cpp
 # sdk/utils/sseclient.h sdk/utils/sseclient.cpp
 # sdk/fileservice.h sdk/fileservice.cpp
 # sdk/realtimeservice.h sdk/realtimeservice.cpp
-# sdk/settingsservice.h sdk/settingsservice.cpp
 # sdk/logservice.h sdk/logservice.cpp
 # sdk/backupservice.h sdk/backupservice.cpp
 # sdk/models/backupmodel.hpp

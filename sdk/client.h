@@ -20,6 +20,7 @@ class RecordService;
 class BaseAuthStore;
 class CollectionService;
 class HealthService;
+class SettingsService;
 
 class PocketBase : public QObject
 {
@@ -35,7 +36,7 @@ public:
     CollectionService* collections() const;
     BaseAuthStore* authStore() const;
     HealthService* health() const;
-
+    SettingsService* settings() const;
 
     QJsonObject send(const QString& path, const QJsonObject params);
 
@@ -62,6 +63,7 @@ private:
     CollectionService* m_collectionService;
     AdminService* m_adminService;
     HealthService* m_healthService;
+    SettingsService* m_settingsService;
 
     QMap<QString, RecordService*> m_recordServices;
 };

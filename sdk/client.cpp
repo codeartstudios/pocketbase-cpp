@@ -5,6 +5,7 @@
 #include "services/collectionservice.h"
 #include "services/adminservice.h"
 #include "services/healthservice.h"
+#include "services/settingsservice.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
@@ -15,7 +16,8 @@ PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout,
     m_authStore( new BaseAuthStore("", nullptr, this) ),
     m_collectionService( new CollectionService(this, this) ),
     m_adminService( new AdminService(this, this) ),
-    m_healthService( new HealthService(this, this) ) {}
+    m_healthService( new HealthService(this, this) ),
+    m_settingsService( new SettingsService(this, this)) {}
 
 AdminService *PocketBase::admins() const { return m_adminService; }
 
@@ -47,6 +49,8 @@ QUrl PocketBase::buildUrl(const QString& path) {
 BaseAuthStore *PocketBase::authStore() const { return m_authStore; }
 
 HealthService *PocketBase::health() const { return m_healthService; }
+
+SettingsService *PocketBase::settings() const { return m_settingsService; }
 
 QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);
