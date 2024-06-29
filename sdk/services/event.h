@@ -5,7 +5,10 @@
 
 class Event {
 public:
-    Event(const QString& id = "", const QString& event = "message", const QString& data = "", int retry = -1);
+    Event(const QString& id = "",
+          const QString& event = "message",
+          const QString& data = "",
+          int retry = -1);
 
     QString getId() const;
     QString getEvent() const;

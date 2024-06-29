@@ -1,7 +1,13 @@
 #include "SSEClient.h"
 
-Event::Event(const QString& id, const QString& event, const QString& data, int retry)
-    : id(id), event(event), data(data), retry(retry) {}
+Event::Event(const QString& id,
+             const QString& event,
+             const QString& data,
+             int retry)
+    : id(id),
+    event(event),
+    data(data),
+    retry(retry) {}
 
 QString Event::getId() const { return id; }
 
@@ -11,7 +17,12 @@ QString Event::getData() const { return data; }
 
 int Event::getRetry() const { return retry; }
 
-EventLoop::EventLoop(const QString& url, const QString& method, const QMap<QString, QString>& headers, const QByteArray& payload, const QString& encoding, QObject* parent)
+EventLoop::EventLoop(const QString& url,
+                     const QString& method,
+                     const QMap<QString, QString>& headers,
+                     const QByteArray& payload,
+                     const QString& encoding,
+                     QObject* parent)
     : QThread(parent),
     url(url),
     method(method),
@@ -23,7 +34,8 @@ EventLoop::EventLoop(const QString& url, const QString& method, const QMap<QStri
     networkManager = new QNetworkAccessManager(this);
 }
 
-void EventLoop::addListener(const QString& event, std::function<void(Event)> listener) {
+void EventLoop::addListener(const QString& event,
+                            std::function<void(Event)> listener) {
     listeners[event] = listener;
 }
 

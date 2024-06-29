@@ -31,6 +31,10 @@ add_executable(pocketbase-cpp
   sdk/dtos/recordmodel.h sdk/dtos/collectionmodel.h
   sdk/dtos/AdminModel.h
   sdk/dtos/logsmodel.h
+  sdk/services/realtimeservice.h sdk/services/realtimeservice.cpp
+  sdk/services/sseclient.h sdk/services/sseclient.cpp
+  sdk/services/eventloop.h sdk/services/eventloop.cpp
+  sdk/services/event.h sdk/services/event.cpp
 )
 target_link_libraries(pocketbase-cpp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 
@@ -41,13 +45,10 @@ install(TARGETS pocketbase-cpp
 )
 
 
+
 # sdk/localauthstore.h sdk/localauthstore.cpp
-# sdk/models/utils/schemafield.h sdk/models/utils/schemafield.cpp
-# sdk/utils/sseclient.h sdk/utils/sseclient.cpp
+# sdk/models/schemafield.h sdk/models/schemafield.cpp
 # sdk/fileservice.h sdk/fileservice.cpp
-# sdk/realtimeservice.h sdk/realtimeservice.cpp
 # sdk/backupservice.h sdk/backupservice.cpp
 # sdk/models/backupmodel.hpp
 # sdk/models/fileuploadmodel.hpp
-  # sdk/utils/eventloop.h sdk/utils/eventloop.cpp
-  # sdk/event.h sdk/event.cpp

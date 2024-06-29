@@ -13,7 +13,10 @@ class Event : public QObject {
     Q_OBJECT
 
 public:
-    explicit Event(const QString& id = "", const QString& event = "message", const QString& data = "", int retry = -1);
+    explicit Event(const QString& id = "",
+                   const QString& event = "message",
+                   const QString& data = "",
+                   int retry = -1);
 
     QString getId() const;
     void setId(const QString& nId) { id = nId; };
@@ -38,7 +41,12 @@ class EventLoop : public QThread {
     Q_OBJECT
 
 public:
-    explicit EventLoop(const QString& url, const QString& method = "GET", const QMap<QString, QString>& headers = {}, const QByteArray& payload = {}, const QString& encoding = "utf-8", QObject* parent = nullptr);
+    explicit EventLoop(const QString& url,
+                       const QString& method = "GET",
+                       const QMap<QString, QString>& headers = {},
+                       const QByteArray& payload = {},
+                       const QString& encoding = "utf-8",
+                       QObject* parent = nullptr);
     void addListener(const QString& event, std::function<void(Event)> listener);
     void removeListener(const QString& event);
     void run() override;
@@ -69,8 +77,14 @@ class SSEClient : public QObject {
     Q_OBJECT
 
 public:
-    explicit SSEClient(const QString& url, const QString& method = "GET", const QMap<QString, QString>& headers = {}, const QByteArray& payload = QByteArray(), const QString& encoding = "utf-8", QObject* parent = nullptr);
-    void addEventListener(const QString& event, std::function<void(const Event&)> callback);
+    explicit SSEClient(const QString& url,
+                       const QString& method = "GET",
+                       const QMap<QString, QString>& headers = {},
+                       const QByteArray& payload = QByteArray(),
+                       const QString& encoding = "utf-8",
+                       QObject* parent = nullptr);
+    void addEventListener(const QString& event,
+                          std::function<void(const Event&)> callback);
     void removeEventListener(const QString& event);
     void close();
 
