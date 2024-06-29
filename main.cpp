@@ -8,6 +8,8 @@
 #include "sdk/dtos/adminmodel.h"
 #include "sdk/services/healthservice.h"
 #include "sdk/services/settingsservice.h"
+#include "sdk/services/logservice.h"
+#include "sdk/dtos/logsmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -121,9 +123,19 @@ int main(int argc, char *argv[])
     // }
 
     // Health check
+    // try {
+    //     auto health = client.settings()->getAll();
+    //     qDebug() << "Settings: " << health;
+    // } catch (ClientResponseError e) {
+    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    // }
+
+    // Logs Service
     try {
-        auto health = client.settings()->getAll();
-        qDebug() << "Settings: " << health;
+        QJsonObject params;
+        params["filter"] = "level>0";
+        auto logsmodel = client.logs()->getList(); // getStats(params);
+        // qDebug() << "Logs: " << logsmodel;
     } catch (ClientResponseError e) {
         qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
     }

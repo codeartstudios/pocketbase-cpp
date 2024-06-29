@@ -2,8 +2,7 @@
 #include "../client.h"
 
 SettingsService::SettingsService(PocketBase* client, QObject *parent)
-    : QObject{parent}, client(client)
-{}
+    : QObject{parent}, client(client) {}
 
 QJsonObject SettingsService::getAll(const QJsonObject &params) {
     QJsonObject payload = params;

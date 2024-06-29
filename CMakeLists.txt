@@ -25,10 +25,12 @@ add_executable(pocketbase-cpp
   sdk/services/adminservice.h sdk/services/adminservice.cpp
   sdk/services/healthservice.h sdk/services/healthservice.cpp
   sdk/services/settingsservice.h sdk/services/settingsservice.cpp
+  sdk/services/logservice.h sdk/services/logservice.cpp
   sdk/dtos/basemodel.h sdk/dtos/basemodel.cpp
   sdk/dtos/listresult.h sdk/dtos/listresult.cpp
   sdk/dtos/recordmodel.h sdk/dtos/collectionmodel.h
   sdk/dtos/AdminModel.h
+  sdk/dtos/logsmodel.h
 )
 target_link_libraries(pocketbase-cpp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 
@@ -44,7 +46,6 @@ install(TARGETS pocketbase-cpp
 # sdk/utils/sseclient.h sdk/utils/sseclient.cpp
 # sdk/fileservice.h sdk/fileservice.cpp
 # sdk/realtimeservice.h sdk/realtimeservice.cpp
-# sdk/logservice.h sdk/logservice.cpp
 # sdk/backupservice.h sdk/backupservice.cpp
 # sdk/models/backupmodel.hpp
 # sdk/models/fileuploadmodel.hpp

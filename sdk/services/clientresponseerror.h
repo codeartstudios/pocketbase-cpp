@@ -5,11 +5,31 @@
 #include <QString>
 #include <QMap>
 #include <QVariant>
+#include <QJsonObject>
 
 class ClientResponseError : public std::runtime_error {
 public:
-    ClientResponseError(const QString& message, int status = 0, const QString& url = "", const QMap<QString, QVariant>& data = {}, bool isAbort = false, const std::exception_ptr& originalError = nullptr)
-        : std::runtime_error(message.toStdString()), m_url(url), m_status(status), m_data(data), m_isAbort(isAbort), m_originalError(originalError) {}
+    ClientResponseError(const QString& message, int status = 0,
+                        const QString& url = "",
+                        const QMap<QString, QVariant>& data = {},
+                        bool isAbort = false,
+                        const std::exception_ptr& originalError = nullptr)
+        : std::runtime_error(message.toStdString()),
+        m_url(url),
+        m_status(status),
+        m_data(data),
+        m_isAbort(isAbort),
+        m_originalError(originalError) {}
+
+    ClientResponseError(const QJsonObject& error = {},
+                        const std::exception_ptr originalError = nullptr)
+        : std::runtime_error(error["message"].toString().toStdString()),
+        m_originalError(originalError) {
+        m_url = error.value("url").toString("");
+        m_status = error.value("status").toInt(0);
+        m_data = error.value("data").toObject({}).toVariantMap();
+        m_isAbort = error.value("status").toBool(false);
+    }
 
     QString url() const { return m_url; }
     void setUrl(const QString& url) { m_url = url; }

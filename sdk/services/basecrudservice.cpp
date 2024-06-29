@@ -74,7 +74,8 @@ BaseModel* BaseCrudService::_getFirstListItem(
         throw ClientResponseError("The requested resource wasn't found.", 404);
     }
 
-    return result.items().first();
+    auto items = result.items();
+    return items.first();
 }
 
 BaseModel* BaseCrudService::_create(
