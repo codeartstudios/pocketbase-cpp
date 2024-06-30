@@ -1,36 +1,42 @@
 #include "event.h"
 
-Event::Event(const QString& id, const QString& event, const QString& data, int retry)
-    : id(id), event(event), data(data), retry(retry) {}
+Event::Event(const QString& id,
+             const QString& event,
+             const QJsonObject& data,
+             int retry)
+    : m_id(id),
+    m_event(event),
+    m_data(data),
+    m_retry(retry) {}
 
-QString Event::getId() const {
-    return id;
+QString Event::id() const {
+    return m_id;
 }
 
-QString Event::getEvent() const {
-    return event;
+QString Event::event() const {
+    return m_event;
 }
 
-QString Event::getData() const {
-    return data;
+QJsonObject Event::data() const {
+    return m_data;
 }
 
-int Event::getRetry() const {
-    return retry;
+int Event::retry() const {
+    return m_retry;
 }
 
 void Event::setId(const QString& id) {
-    this->id = id;
+    m_id = id;
 }
 
 void Event::setEvent(const QString& event) {
-    this->event = event;
+    m_event = event;
 }
 
-void Event::setData(const QString& data) {
-    this->data = data;
+void Event::setData(const QJsonObject& data) {
+    m_data = data;
 }
 
 void Event::setRetry(int retry) {
-    this->retry = retry;
+    m_retry = retry;
 }

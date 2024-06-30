@@ -7,6 +7,7 @@
 #include "services/healthservice.h"
 #include "services/settingsservice.h"
 #include "services/logservice.h"
+#include "services/realtimeservice.h"
 
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
     : QObject(parent),
@@ -19,7 +20,8 @@ PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout,
     m_adminService( new AdminService(this, this) ),
     m_healthService( new HealthService(this, this) ),
     m_settingsService( new SettingsService(this, this)),
-    m_logService( new LogService(this, this) ) {}
+    m_logService( new LogService(this, this) ),
+    m_realtimeService( new RealtimeService(this, this) ) {}
 
 AdminService *PocketBase::admins() const { return m_adminService; }
 
@@ -55,6 +57,8 @@ HealthService *PocketBase::health() const { return m_healthService; }
 SettingsService *PocketBase::settings() const { return m_settingsService; }
 
 LogService *PocketBase::logs() const { return m_logService; }
+
+RealtimeService *PocketBase::realtime() const { return m_realtimeService; }
 
 QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);

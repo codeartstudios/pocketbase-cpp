@@ -33,7 +33,6 @@ add_executable(pocketbase-cpp
   sdk/dtos/logsmodel.h
   sdk/services/realtimeservice.h sdk/services/realtimeservice.cpp
   sdk/services/sseclient.h sdk/services/sseclient.cpp
-  sdk/services/eventloop.h sdk/services/eventloop.cpp
   sdk/services/event.h sdk/services/event.cpp
 )
 target_link_libraries(pocketbase-cpp Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)

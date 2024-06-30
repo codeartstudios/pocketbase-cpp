@@ -1,122 +1,104 @@
-#include "SSEClient.h"
+#include "sseclient.h"
+#include "../client.h"
+#include "baseauthstore.h"
 
-Event::Event(const QString& id,
-             const QString& event,
-             const QString& data,
-             int retry)
-    : id(id),
-    event(event),
-    data(data),
-    retry(retry) {}
+SSEClient::SSEClient(const QString& url, PocketBase* client, QObject *parent)
+    : QObject(parent),
+    m_url(url),
+    m_connected(false),
+    m_open(false),
+    client(client) {}
 
-QString Event::getId() const { return id; }
-
-QString Event::getEvent() const { return event; }
-
-QString Event::getData() const { return data; }
-
-int Event::getRetry() const { return retry; }
-
-EventLoop::EventLoop(const QString& url,
-                     const QString& method,
-                     const QMap<QString, QString>& headers,
-                     const QByteArray& payload,
-                     const QString& encoding,
-                     QObject* parent)
-    : QThread(parent),
-    url(url),
-    method(method),
-    headers(headers),
-    payload(payload),
-    encoding(encoding),
-    kill(false)
+void SSEClient::connectSSE()
 {
-    networkManager = new QNetworkAccessManager(this);
+    m_nman =  new QNetworkAccessManager(this);
+    QNetworkRequest request(QUrl{m_url});
+
+    auto token = client->authStore()->token().toUtf8();
+    qDebug() << "Token: " << token;
+
+    request.setRawHeader("Accept","text/event-stream");
+    request.setRawHeader("Authorization", "Bearer " + token);
+    // request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
+                         QNetworkRequest::AlwaysNetwork);
+
+    qDebug() << "Sending GET request to > " << request.url().toString();
+
+    QNetworkReply *reply = m_nman->get(request);
+    connect(reply, &QNetworkReply::readyRead,
+            this, &SSEClient::onReplyReadyRead);
+    connect(reply, &QNetworkReply::finished,
+            this, &SSEClient::onReplyFinished);
+
+    QEventLoop wait_loop;
+    connect(reply, &QNetworkReply::finished, &wait_loop, &QEventLoop::quit);
+    wait_loop.exec();
 }
 
-void EventLoop::addListener(const QString& event,
-                            std::function<void(Event)> listener) {
-    listeners[event] = listener;
-}
-
-void EventLoop::removeListener(const QString& event) {
-    listeners.remove(event);
-}
-
-void EventLoop::run() {
-    QNetworkRequest request(QUrl{url});
-    for (auto it = headers.begin(); it != headers.end(); ++it) {
-        request.setRawHeader(it.key().toUtf8(), it.value().toUtf8());
+void SSEClient::close()
+{
+    if( m_nman ) {
+        //
     }
-
-    if (method.toUpper() == "POST") {
-        reply = networkManager->post(request, payload);
-    } else {
-        reply = networkManager->get(request);
-    }
-
-    connect(reply, &QNetworkReply::readyRead, this, &EventLoop::onReadyRead);
-
-    exec();
 }
 
-void EventLoop::stop() {
-    kill = true;
-    if (reply) {
-        reply->abort();
-    }
-    quit();
-    wait();
-}
+void SSEClient::setUrl(const QString url) { m_url = url; }
 
-void EventLoop::onReadyRead() {
-    if (kill) return;
-    readStream();
-}
+bool SSEClient::isOpen() { return m_open; }
 
-void EventLoop::readStream() {
-    QByteArray data = reply->readAll();
-    processEvent(data);
-}
+bool SSEClient::isConnected() { return m_connected; }
 
-void EventLoop::processEvent(const QByteArray& data) {
-    Event event;
-    QList<QByteArray> lines = data.split('\n');
-    for (const QByteArray& line : lines) {
-        if (line.startsWith("id:")) {
-            event.setId(line.mid(3).trimmed());
-        } else if (line.startsWith("event:")) {
-            event.setEvent(line.mid(6).trimmed());
-        } else if (line.startsWith("data:")) {
-            event.setData(line.mid(5).trimmed());
-        } else if (line.startsWith("retry:")) {
-            event.setRetry(line.mid(6).trimmed().toInt());
+void SSEClient::onReplyReadyRead()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+
+    if(reply)
+    {
+        m_connected = true;
+
+        QString response(reply->readAll());
+        QStringList responseList = response.split("\n");
+
+        if( responseList.size() > 2 )
+        {
+            QString id=responseList.at(0);
+            id = id.replace("id:","");
+
+            QString event=responseList.at(1);
+            event=event.replace("event:","");
+
+            QStringList dataArray;
+
+            // for(int i=2; i<responseList.size(); i++) {
+            //     QString data=responseList.at(i);
+            //     data = data.trimmed();
+            //     if(data.startsWith("data:"))
+            //         data=data.replace("data:","");
+            //     if( data!="" ) dataArray.append(data);
+            // }
+
+            QString data=responseList.at(2);
+            data = data.trimmed();
+            if(data.startsWith("data:"))
+                data=data.replace("data:","");
+            if( data!="" ) dataArray.append(data);
+
+            if( event == "PB_CONNECT") {
+                m_open = true;
+            }
+
+            emit dataReceived(id,event,data);
         }
     }
-    if (listeners.contains(event.getEvent())) {
-        listeners[event.getEvent()](event);
-    }
+
+    else
+        m_connected = false;
 }
 
-SSEClient::SSEClient(const QString& url, const QString& method, const QMap<QString, QString>& headers, const QByteArray& payload, const QString& encoding, QObject* parent)
-    : QObject(parent) {
-    loopThread = new EventLoop(url, method, headers, payload, encoding, this);
-    connect(loopThread, &EventLoop::finished, loopThread, &QObject::deleteLater);
-    loopThread->start();
+void SSEClient::onReplyFinished()
+{
+    m_open = false;
+    m_connected = false;
+    QTimer::singleShot(1000, [&](){ connectSSE(); });
 }
-
-void SSEClient::addEventListener(const QString& event, std::function<void(const Event&)> callback) {
-    listeners[event] = callback;
-    loopThread->addListener(event, callback);
-}
-
-void SSEClient::removeEventListener(const QString& event) {
-    listeners.remove(event);
-    loopThread->removeListener(event);
-}
-
-void SSEClient::close() {
-    loopThread->stop();
-    loopThread->wait();
-}
-
