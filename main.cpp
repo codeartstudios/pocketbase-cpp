@@ -10,6 +10,9 @@
 #include "sdk/services/settingsservice.h"
 #include "sdk/services/logservice.h"
 #include "sdk/dtos/logsmodel.h"
+#include "sdk/services/event.h"
+
+#include <QTimer>
 
 int main(int argc, char *argv[])
 {
@@ -17,13 +20,35 @@ int main(int argc, char *argv[])
 
     PocketBase client{"http://127.0.0.1:5740/"};
 
-    // ADMIN
     try {
-        auto user = client.admins()->authWithPassword("admin@admin.com", "12345678901");
-        qDebug() << "Admin User: " << user.getToken() << "\t: " << user.getAdmin()->data();
+
+        qDebug() << "Temperature Subscribed ...";
+
+        QTimer::singleShot(10000, [&]() {
+            qDebug() << "Unsubscribe from 'cow'";
+        });
+        QTimer::singleShot(15000, [&]() {
+            client.collection("temperature")->unsubscribe();
+            qDebug() << "Unsubscribe from 'temperature'";
+        });
+
+        client.collection("temperature")->subscribe([&](const Event& data){
+            qDebug() << "New Data: " << data.data();
+        });
+
     } catch (ClientResponseError e) {
         qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
     }
+
+    qDebug() << "Hello ...";
+
+    // ADMIN
+    // try {
+    //     auto user = client.admins()->authWithPassword("admin@admin.com", "12345678901");
+    //     qDebug() << "Admin User: " << user.getToken() << "\t: " << user.getAdmin()->data();
+    // } catch (ClientResponseError e) {
+    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    // }
 
     // try {
     //     QJsonObject body;
@@ -131,14 +156,14 @@ int main(int argc, char *argv[])
     // }
 
     // Logs Service
-    try {
-        QJsonObject params;
-        params["filter"] = "level>0";
-        auto logsmodel = client.logs()->getList(); // getStats(params);
-        // qDebug() << "Logs: " << logsmodel;
-    } catch (ClientResponseError e) {
-        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    }
+    // try {
+    //     QJsonObject params;
+    //     params["filter"] = "level>0";
+    //     auto logsmodel = client.logs()->getList(); // getStats(params);
+    //     // qDebug() << "Logs: " << logsmodel;
+    // } catch (ClientResponseError e) {
+    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    // }
 
     // Auth with password
     // auto user = client.collection("users")->authWithPassword("test@user.com", "123456789");

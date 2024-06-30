@@ -22,6 +22,7 @@ class CollectionService;
 class HealthService;
 class SettingsService;
 class LogService;
+class RealtimeService;
 
 class PocketBase : public QObject
 {
@@ -39,6 +40,7 @@ public:
     HealthService* health() const;
     SettingsService* settings() const;
     LogService* logs() const;
+    RealtimeService* realtime() const;
 
     QJsonObject send(const QString& path, const QJsonObject params);
 
@@ -67,6 +69,7 @@ private:
     HealthService* m_healthService;
     SettingsService* m_settingsService;
     LogService* m_logService;
+    RealtimeService* m_realtimeService;
 
     QMap<QString, RecordService*> m_recordServices;
 };

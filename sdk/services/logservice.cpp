@@ -61,7 +61,7 @@ ListResult LogService::getList(int page, int perPage, const QJsonObject paramObj
     if ( data.contains("items") ) {
         QJsonArray itemsArray = data["items"].toArray();
         for (const QJsonValue& item : itemsArray) {
-            items.append(decode(item.toObject()));
+            items.append(new BaseModel(item.toObject()));
         }
     }
 

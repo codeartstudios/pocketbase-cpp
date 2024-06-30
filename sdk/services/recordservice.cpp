@@ -1,6 +1,7 @@
 #include "recordservice.h"
 #include "baseauthstore.h"
 #include "../client.h"
+#include "realtimeservice.h"
 
 RecordAuthResponse::RecordAuthResponse(const QString &token, RecordModel* record)
     : token(token), record(record) {}
@@ -65,24 +66,31 @@ QString RecordService::baseCrudPath() const {
 //     return result;
 // }
 
-void RecordService::subscribe(std::function<void (const QVariant &)> callback) {
-    // client->realtime()->subscribe(collectionIdOrName, callback);
+void RecordService::subscribe(std::function<void (const Event &)> callback) {
+    client->realtime()->subscribe(m_collectionIdOrName, callback);
 }
 
-void RecordService::subscribeOne(const QString &recordId, std::function<void (const QVariant &)> callback) {
-    // client->realtime()->subscribe(collectionIdOrName + "/" + recordId, callback);
+void RecordService::subscribeOne(const QString &recordId, std::function<void (const Event &)> callback) {
+    client->realtime()->subscribe(m_collectionIdOrName + "/" + recordId, callback);
+}
+
+void RecordService::unsubscribe() {
+    client->realtime()->unsubscribe( m_collectionIdOrName );
+}
+
+void RecordService::unsubscribe(const QString &id) {
+    if ( !id.isEmpty() ) {
+        QString topic = m_collectionIdOrName + "/" + id;
+        client->realtime()->unsubscribe(topic);
+    }
 }
 
 void RecordService::unsubscribe(const QStringList &recordIds) {
-    /*if (!recordIds.isEmpty()) {
-        QStringList subs;
+    if ( !recordIds.isEmpty() ) {
         for (const auto& id : recordIds) {
-            subs.append(collectionIdOrName + "/" + id);
+            client->realtime()->unsubscribe(m_collectionIdOrName + "/" + id);
         }
-        client->realtime()->unsubscribe(subs);
-    } else {
-        client->realtime()->unsubscribeByPrefix(collectionIdOrName);
-    } */
+    }
 }
 
 RecordModel RecordService::update(

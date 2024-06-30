@@ -12,6 +12,7 @@
 #include <QEventLoop>
 
 #include "crudservice.h"
+#include "event.h"
 #include "../dtos/recordmodel.h"
 
 // Forward declaration
@@ -65,10 +66,12 @@ public:
 
     QString getFileUrl(const RecordModel& record, const QString& filename, const QUrlQuery& queryParams = QUrlQuery()) const;
 
-    void subscribe(std::function<void(const QVariant&)> callback);
+    void subscribe(std::function<void(const Event&)> callback);
 
-    void subscribeOne(const QString& recordId, std::function<void(const QVariant&)> callback);
+    void subscribeOne(const QString& recordId, std::function<void(const Event&)> callback);
 
+    void unsubscribe();
+    void unsubscribe(const QString& id);
     void unsubscribe(const QStringList& recordIds);
 
     RecordModel update(const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());

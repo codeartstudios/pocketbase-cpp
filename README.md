@@ -9,7 +9,7 @@ Work still in progress, many breaking changes without notice as we try to match 
 - [X] Admin Service
 - [ ] Records Service (partially)
   - [X] Auth With Password
-  - [ ] Auth with OAuth2
+  - [ ] Auth with OAuth2 (In Plans)
   - [X] Auth Refresh
   - [X] Request Email Verification
   - [X] Confirm Email Verification
@@ -17,10 +17,10 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [X] Confirm Password Reset
   - [X] Request Email Change
   - [X] Confirm Email Change
-  - [ ] List auth methods
-  - [ ] List OAuth2 accounts
-  - [ ] Unlink OAuth2 account 
-- [ ] Crud Service
+  - [ ] List auth methods (Not planned)
+  - [ ] List OAuth2 accounts (Not planned)
+  - [ ] Unlink OAuth2 account  (Not planned)
+- [X] Crud Service
   - [X] Search/List
     - [X] GetList
     - [X] GetFullList
@@ -29,14 +29,15 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [X] Create
   - [X] Update
   - [X] Delete
-  - [ ] Realtime (pending)
+  - [X] Realtime
 - [X] Collections Service
-- [ ] File Service
+- [ ] File Service (In plan)
 - [X] Health Service
-- [ ] Backup Service
+- [ ] Backup Service (Not planned)
 - [X] Log Service
-- [ ] Realtime Service
+- [X] Realtime Service
 - [X] Settings Service
+- [ ] Documentation
 
 
 ## Installation
