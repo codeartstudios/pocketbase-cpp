@@ -1,5 +1,5 @@
-#include "baseauthstore.h"
-#include "../models/recordmodel.h"
+#include <pocketbase/services/baseauthstore.h>
+#include <pocketbase/models/recordmodel.h>
 
 namespace pb {
 BaseAuthStore::BaseAuthStore(const QString& baseToken, RecordModel* baseModel, QObject* parent)

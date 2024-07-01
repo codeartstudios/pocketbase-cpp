@@ -1,8 +1,8 @@
-#include "logservice.h"
-#include "../client.h"
-#include "../models/listresult.h"
-#include "../models/logsmodel.h"
-#include "clientresponseerror.h"
+#include <pocketbase/services/logservice.h>
+#include <pocketbase/services/clientresponseerror.h>
+#include <pocketbase/models/listresult.h>
+#include <pocketbase/models/logsmodel.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 LogService::LogService(PocketBase* client, QObject *parent)

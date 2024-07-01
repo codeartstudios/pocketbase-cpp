@@ -1,5 +1,5 @@
-#include "crudservice.h"
-#include "../client.h"
+#include <pocketbase/services/crudservice.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 CrudService::CrudService(PocketBase* client, QObject* parent)

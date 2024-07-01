@@ -1,5 +1,5 @@
-#include "healthservice.h"
-#include "../client.h"
+#include <pocketbase/services/healthservice.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 HealthService::HealthService(PocketBase* client, QObject *parent)

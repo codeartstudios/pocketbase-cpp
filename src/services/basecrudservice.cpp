@@ -1,6 +1,6 @@
-#include "basecrudservice.h"
-#include "../client.h"
-#include "clientresponseerror.h"
+#include <pocketbase/services/basecrudservice.h>
+#include <pocketbase/services/clientresponseerror.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 BaseCrudService::BaseCrudService(PocketBase* client, QObject* parent)

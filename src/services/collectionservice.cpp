@@ -1,5 +1,5 @@
-#include "collectionservice.h"
-#include "../client.h"
+#include <pocketbase/services/collectionservice.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 CollectionService::CollectionService(PocketBase* client, QObject *parent)

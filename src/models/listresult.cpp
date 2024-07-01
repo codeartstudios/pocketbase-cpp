@@ -1,5 +1,5 @@
-#include "ListResult.h"
-#include "BaseModel.h"
+#include <pocketbase/models/listresult.h>
+#include <pocketbase/models/basemodel.h>
 
 namespace pb {
 ListResult::ListResult(

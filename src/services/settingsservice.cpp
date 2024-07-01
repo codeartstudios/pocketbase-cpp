@@ -1,5 +1,5 @@
-#include "settingsservice.h"
-#include "../client.h"
+#include <pocketbase/services/settingsservice.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 SettingsService::SettingsService(PocketBase* client, QObject *parent)

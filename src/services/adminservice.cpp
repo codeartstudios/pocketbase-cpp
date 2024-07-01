@@ -1,8 +1,8 @@
-#include "adminservice.h"
-#include "baseauthstore.h"
-#include "../client.h"
-#include "../models/adminmodel.h"
-#include "../models/basemodel.h"
+#include <pocketbase/services/adminservice.h>
+#include <pocketbase/services/baseauthstore.h>
+#include <pocketbase/models/adminmodel.h>
+#include <pocketbase/models/basemodel.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 AdminAuthResponse::AdminAuthResponse(const QString& token, AdminModel* admin)

@@ -1,13 +1,13 @@
-#include "client.h"
-#include "services/recordservice.h"
-#include "services/baseauthstore.h"
-#include "services/clientresponseerror.h"
-#include "services/collectionservice.h"
-#include "services/adminservice.h"
-#include "services/healthservice.h"
-#include "services/settingsservice.h"
-#include "services/logservice.h"
-#include "services/realtimeservice.h"
+#include <pocketbase/client.h>
+#include <pocketbase/services/recordservice.h>
+#include <pocketbase/services/baseauthstore.h>
+#include <pocketbase/services/clientresponseerror.h>
+#include <pocketbase/services/collectionservice.h>
+#include <pocketbase/services/adminservice.h>
+#include <pocketbase/services/healthservice.h>
+#include <pocketbase/services/settingsservice.h>
+#include <pocketbase/services/logservice.h>
+#include <pocketbase/services/realtimeservice.h>
 
 namespace pb {
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)

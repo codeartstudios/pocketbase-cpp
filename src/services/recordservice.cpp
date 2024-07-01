@@ -1,7 +1,7 @@
-#include "recordservice.h"
-#include "baseauthstore.h"
-#include "../client.h"
-#include "realtimeservice.h"
+#include <pocketbase/services/recordservice.h>
+#include <pocketbase/services/baseauthstore.h>
+#include <pocketbase/services/realtimeservice.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 RecordAuthResponse::RecordAuthResponse(const QString &token, RecordModel* record)

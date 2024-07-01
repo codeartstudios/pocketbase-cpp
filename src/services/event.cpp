@@ -1,4 +1,4 @@
-#include "event.h"
+#include <pocketbase/services/event.h>
 
 namespace pb {
 Event::Event(const QString& id,

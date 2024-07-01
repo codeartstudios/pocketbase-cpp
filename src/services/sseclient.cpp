@@ -1,6 +1,6 @@
-#include "sseclient.h"
-#include "../client.h"
-#include "baseauthstore.h"
+#include <pocketbase/services/sseclient.h>
+#include <pocketbase/services/baseauthstore.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 SSEClient::SSEClient(const QString& url, PocketBase* client, QObject *parent)

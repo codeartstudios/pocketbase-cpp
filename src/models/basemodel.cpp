@@ -1,4 +1,4 @@
-#include "BaseModel.h"
+#include <pocketbase/models/basemodel.h>
 
 namespace pb {
 BaseModel::BaseModel(const QJsonObject& data, QObject* parent)

@@ -1,15 +1,15 @@
 #include <QCoreApplication>
-#include <client.h>
-#include <services/recordservice.h>
-#include <services/baseauthstore.h>
-#include <services/clientresponseerror.h>
-#include <services/adminservice.h>
-#include <services/collectionservice.h>
-#include <services/healthservice.h>
-#include <services/settingsservice.h>
-#include <services/logservice.h>
-#include <models/adminmodel.h>
-#include <models/logsmodel.h>
+#include <pocketbase/client.h>
+#include <pocketbase/services/recordservice.h>
+#include <pocketbase/services/baseauthstore.h>
+#include <pocketbase/services/clientresponseerror.h>
+#include <pocketbase/services/adminservice.h>
+#include <pocketbase/services/collectionservice.h>
+#include <pocketbase/services/healthservice.h>
+#include <pocketbase/services/settingsservice.h>
+#include <pocketbase/services/logservice.h>
+#include <pocketbase/models/adminmodel.h>
+#include <pocketbase/models/logsmodel.h>
 
 #include <QTimer>
 

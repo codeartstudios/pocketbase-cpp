@@ -1,5 +1,5 @@
-#include "realtimeservice.h"
-#include "../client.h"
+#include <pocketbase/services/realtimeservice.h>
+#include <pocketbase/client.h>
 
 namespace pb {
 RealtimeService::RealtimeService(PocketBase *client, QObject *parent)

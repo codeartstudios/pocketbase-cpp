@@ -21,7 +21,7 @@ target_link_libraries(pocketbase-sample
 )
 
 
-target_include_directories(pocketbase-sample PRIVATE ../src)
+target_include_directories(pocketbase-sample PRIVATE ../include)
 
 include(GNUInstallDirs)
 install(TARGETS pocketbase-sample
