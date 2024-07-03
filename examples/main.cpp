@@ -15,94 +15,134 @@
 
 using namespace pb;
 
+
+void loginAdmin(pb::PocketBase* client);
+
+void createAdminAccount(pb::PocketBase* client);
+
+void deleteAdminAccount(pb::PocketBase* client);
+
+void getAdmins(pb::PocketBase* client);
+
+void subscribeToRecord(pb::PocketBase* client, const QString& recordIdOrName);
+
+void testCollections(pb::PocketBase* client);
+
+void testHealthCheck(pb::PocketBase* client);
+
+void testLogService(pb::PocketBase* client);
+
+void testUserAuthentication(pb::PocketBase* client);
+
+void testCrudRecords(pb::PocketBase* client);
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
     PocketBase client{"http://127.0.0.1:5740/"};
 
+    // Admin Accounts
+    loginAdmin(&client);
+    createAdminAccount(&client);
+    getAdmins(&client);
+    deleteAdminAccount(&client);
+
+    subscribeToRecord(&client, "collectionIdOrName");
+    testCollections(&client);
+    testHealthCheck(&client);
+
+    testLogService(&client);
+    testUserAuthentication(&client);
+    testCrudRecords(&client);
+
+    return a.exec();
+}
+
+void loginAdmin(pb::PocketBase* client) {
     try {
-        client.collection("temperature")->subscribe([&](const Event& data){
-            qDebug() << "New Data: " << data.data();
+        auto user = client->admins()->authWithPassword("admin@admin.com", "12345678901");
+        qDebug() << "Admin User Token: " << user.getToken();
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
+
+void createAdminAccount(pb::PocketBase* client) {
+    try {
+        QJsonObject body;
+        body["email"] = "admin@admin.com";
+        body["password"] = "12345678901";
+        body["passwordConfirm"] = "12345678901";
+
+        auto user = client->admins()->create(body);
+        qDebug() << "New Admin User: " << user->data();
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
+
+void deleteAdminAccount(pb::PocketBase* client) {
+    // Delete Admin Account
+    try {
+        qDebug() << "Deleted? " << client->admins()->deleteOne("<admin ID>");
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
+
+void getAdmins(pb::PocketBase* client) {
+    try {
+        // Get single admin from the given ID
+        auto admin = client->admins()->getOne("<admin ID>");
+        qDebug() << admin->data();
+
+        // List All admins
+        auto admins = client->admins()->getFullList();
+        qDebug() << "\nNumber of Admins: " << admins.size();
+
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
+
+void subscribeToRecord(pb::PocketBase* client, const QString& recordIdOrName) {
+    try {
+        client->collection(recordIdOrName)->subscribe([&](const Event& data){
+            qDebug() << "Data: " << data.data();
         });
 
-        qDebug() << "Temperature Subscribed ...";
-
+        // Lets unsubscribe after 20s
         QTimer::singleShot(20000, [&]() {
-            client.collection("temperature")->unsubscribe("cow");
+            client->collection(recordIdOrName)->unsubscribe();
             qDebug() << "Unsubscribe from 'cow'";
-        });
-
-        QTimer::singleShot(35000, [&]() {
-            client.collection("temperature")->unsubscribe();
-            qDebug() << "Unsubscribe from 'temperature'";
         });
 
     } catch (ClientResponseError e) {
         qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
     }
+}
 
-    qDebug() << "Hello ...";
-
-    // ADMIN
-    // try {
-    //     auto user = client.admins()->authWithPassword("admin@admin.com", "12345678901");
-    //     qDebug() << "Admin User: " << user.getToken() << "\t: " << user.getAdmin()->data();
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
-
-    // try {
-    //     QJsonObject body;
-    //     body["email"] = "admin@admin.com";
-    //     body["password"] = "12345678901";
-    //     body["passwordConfirm"] = "12345678901";
-
-    //     auto user = client.admins()->create(body);
-    //     qDebug() << "New Admin User: " << user->data();
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
-
-    // Delete Admin Account
-    // try {
-    //     qDebug() << "Deleted? " << client.admins()->deleteOne("yb91mv96rfzdtuh");
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
-
-    // try {
-    //     qDebug() << "Get One Admin ...";
-    //     auto admin = client.admins()->getOne("ry4ntta74xnwbhh");
-    //     qDebug() << "\nOne Admin: " << admin->data();
-
-    //     qDebug() << "List All Admins ...";
-    //     auto admins = client.admins()->getFullList();
-    //     qDebug() << "\nNumber of Admins: " << admins.size();
-
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
-
+void testCollections(pb::PocketBase* client) {
     // Collection Matters
     try {
         // Returns a paginated collections list.
-        // qDebug() << "\n fetching paginated collections list";
-        // auto list = client.collections()->getList(1, 30);
-        // qDebug() << "Number of collections: " << list.items().size();
+        qDebug() << "\n fetching paginated collections list";
+        auto list = client->collections()->getList(1, 30);
+        qDebug() << "Number of collections: " << list.items().size();
 
         // Returns a list with all collections batch fetched at once.
-        // qDebug() << "\n list with all collections batch fetched at once";
-        // auto fullList = client.collections()->getFullList();
-        // qDebug() << "Number of all collections at once: " << fullList.size();
+        auto fullList = client->collections()->getFullList();
+        qDebug() << "Number of all collections at once: " << fullList.size();
 
         // Returns the first found collection matching the specified filter.
-        // auto col = client.collections()->getFirstListItem("name='temperature'");
-        // qDebug() << "Col: " << col->data();
+        auto column = client->collections()->getFirstListItem("name='<something>'");
+        qDebug() << "Col: " << column->data();
 
         // Returns a single collection by its id.
-        // auto byId = client.collections()->getOne("temperature"); // "pgr0wspl39wn3xs");
-        // qDebug() << "Is 'pgr0wspl39wn3xs' == " << byId->getId();
+        auto colByID = client->collections()->getOne("recordNameOrID");
+        qDebug() << "Record ID: " << colByID->getId();
 
         // Creates (aka. register) a new collection.
         QJsonObject recordA, col;
@@ -121,121 +161,105 @@ int main(int argc, char *argv[])
         schema.append(col);
 
         recordA["schema"] = schema;
-        // auto newCol = client.collections()->create(recordA);
-        // qDebug() << "New Table: " << newCol->data();
+        auto newCol = client->collections()->create(recordA);
+        qDebug() << "New Collection: " << newCol->data();
 
         // Updates an existing collection by its id.
-        // recordA["name"] = "somethings";
-        // auto tableUpdate = client.collections()->update("something",  recordA);
-        // qDebug() << "Update: " << tableUpdate->data();
+        recordA["name"] = "somethings";
+        auto tableUpdate = client->collections()->update("something",  recordA);
+        qDebug() << "Update: " << tableUpdate->data();
 
         // Deletes a single collection by its id.
-        // qDebug() << "Is deleted? " << client.collections()->deleteOne("somethings");
+        qDebug() << "Is deleted? " << client->collections()->deleteOne("somethings");
 
         // Imports the provided collections.
-        // QJsonArray schemas;
-        // schemas.append(recordA);
-        // qDebug() << "Import Successful? " << client.collections()->import(schemas);
+        QJsonArray schemas;
+        schemas.append(recordA); // Add collections to schema
+        qDebug() << "Import Successful? " << client->collections()->import(schemas);
 
     } catch (ClientResponseError e) {
         qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
     }
+}
 
-    // Health check
-    // try {
-    //     auto health = client.health()->check();
-    //     qDebug() << "New Admin User: " << health;
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
+void testLogService(pb::PocketBase* client) {
+    try {
+        QJsonObject params;
+        params["filter"] = "level>0";
+        auto logsmodel = client->logs()->getList();
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
 
-    // Health check
-    // try {
-    //     auto health = client.settings()->getAll();
-    //     qDebug() << "Settings: " << health;
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
+void testUserAuthentication(pb::PocketBase* client) {
+    try {
+        auto user = client->collection("users")->authWithPassword("test@user.com", "123456789");
+        qDebug() << client->authStore()->isValid();
 
-    // Logs Service
-    // try {
-    //     QJsonObject params;
-    //     params["filter"] = "level>0";
-    //     auto logsmodel = client.logs()->getList(); // getStats(params);
-    //     // qDebug() << "Logs: " << logsmodel;
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
+        // Auth Refresh
+        auto refreshUser = client->collection("users")->authRefresh();
+        qDebug() << refreshUser.isValid();
 
-    // Auth with password
-    // auto user = client.collection("users")->authWithPassword("test@user.com", "123456789");
-    // qDebug() << client.authStore()->isValid() << user.isValid();
-    // qDebug() << client.authStore()->token();
-    // qDebug() << client.authStore()->model()->getId();
-    // qDebug() << client.authStore()->model()->repr();
+        // Request Verification
+        qDebug() << client->collection("users")->requestVerification("EMAIL");
 
-    // Auth Refresh
-    //auto refreshUser = client.collection("users")->authRefresh();
-    //qDebug() << refreshUser.isValid();
+        qDebug() << client->collection("users")->confirmVerification("CODE");
 
-    // Request Verification
-    // qDebug() << client.collection("users")->requestVerification("EMAIL");
+        qDebug() << client->collection("users")->requestPasswordReset("EMAIL");
 
-    //qDebug() << client.collection("users")->confirmVerification("CODE");
+        qDebug() << client->collection("users")->confirmPasswordReset("TOKEN", "PASSWORD", "CONFIRM PASSWORD");
 
-    // qDebug() << client.collection("users")->requestPasswordReset("EMAIL");
+        qDebug() << client->collection("users")->requestEmailChange("EMAIL");
 
-    // qDebug() << client.collection("users")->confirmPasswordReset("TOKEN", "PASSWORD", "CONFIRM PASSWORD");
+        qDebug() << client->collection("users")->confirmEmailChange("TOKEN", "PASSWORD");
 
-    // qDebug() << client.collection("users")->requestEmailChange("EMAIL");
+        client->collection("users")->listAuthMethods();
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
 
-    // qDebug() << client.collection("users")->confirmEmailChange("TOKEN", "PASSWORD");
+void testCrudRecords(pb::PocketBase* client) {
+    try {
+        auto items = client->collection("collectionIdOrName")->getList(2,30);
+        qDebug() << "Items: " << items.items().size();
 
-    // client.collection("users")->listAuthMethods();
+        QJsonObject filter;
+        filter["sort"] = "-created";
+        filter["filter"] = "created>'2024-06-22 10:28'";
+        auto records = client->collection("collectionIdOrName")->getFullList(500, filter);
+        qDebug() << "Items: " << records.data();
 
-    // auto items = client.collection("temperature")->getList(2,30);
-    // qDebug() << "Items: " << items.items().size();
+        // Get single record by ID
+        auto item = client->collection("collectionIdOrName")->getOne("<row ID>");
+        qDebug() << "One Item: " << item->data();
 
-    // QJsonObject filter;
-    // filter["sort"] = "-created";
-    // filter["filter"] = "created>'2024-06-22 10:28'";
-    // auto items = client.collection("temperature")->getFullList(500, filter);
-    // qDebug() << "Items: " << items.size();
+        auto firstItem = client->collection("collectionIdOrName")->getFirstListItem("value=2121");
+        qDebug() << "First Item -> " << firstItem->data();
 
-    // for(const auto &item : items) {
-    //     qDebug() << item->data()["created"].toString();
-    // }
+        // Create
+        QJsonObject temp;
+        temp.insert("value", 321.345);
+        auto d = client->collection("collectionIdOrName")->create(temp);
+        qDebug() << d->data();
 
-    // auto item = client.collection("temperature")->getOne("8oc6rhllnbekc0y");
-    // qDebug() << "One Item: " << item->data();
+        // Update
+        temp.insert("value", 320.5);
+        auto e = client->collection("collectionIdOrName")->update("0gje5svwe1uemcy", temp);
+        qDebug() << e.data();
 
-    // auto d = client.collection("temperature")->getFirstListItem("value=2121");
+        qDebug() << "Deleted? " << client->collection("collectionIdOrName")->deleteRecord("0gje5svwe1uemcy");
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
 
-    // qDebug() << "Result -> " << d->data();
-
-    // Create
-    // QJsonObject temp;
-    // temp.insert("value", 321.345);
-    // auto d = client.collection("temperature")->create(temp);
-    // qDebug() << d->data();
-
-    // Update
-
-    // try {
-    //     temp.insert("value", 320.5);
-    //     auto e = client.collection("temperature")->update("0gje5svwe1uemcy", temp);
-    //     qDebug() << e.data();
-    // } catch (ClientResponseError e) {
-    //qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
-
-    // try {
-    //     qDebug() << "Deleted? " << client.collection("temperature")->deleteRecord("0gje5svwe1uemcy");
-    // } catch (ClientResponseError e) {
-    //     qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
-    // }
-
-    // Delete
-
-    return a.exec();
+void testHealthCheck(pb::PocketBase* client) {
+    try {
+        auto health = client->health()->check();
+        qDebug() << "Response: " << health;
+    } catch (ClientResponseError e) {
+        qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
 }

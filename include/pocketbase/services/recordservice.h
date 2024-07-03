@@ -72,7 +72,9 @@ public:
     void subscribeOne(const QString& recordId, std::function<void(const Event&)> callback);
 
     void unsubscribe();
+
     void unsubscribe(const QString& id);
+
     void unsubscribe(const QStringList& recordIds);
 
     RecordModel update(const QString& id, const QJsonObject& bodyParams = QJsonObject(), const QJsonObject& queryParams = QJsonObject());
