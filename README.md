@@ -37,7 +37,7 @@ Work still in progress, many breaking changes without notice as we try to match 
 - [X] Log Service
 - [X] Realtime Service
 - [X] Settings Service
-- [ ] Documentation
+- [X] Documentation
 
 
 ## Installation
