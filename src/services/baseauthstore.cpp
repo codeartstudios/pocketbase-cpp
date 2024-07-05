@@ -2,12 +2,12 @@
 #include <pocketbase/models/recordmodel.h>
 
 namespace pb {
-BaseAuthStore::BaseAuthStore(const QString& baseToken, RecordModel* baseModel, QObject* parent)
-    : QObject(parent), m_baseToken(baseToken), m_baseModel(baseModel) {}
-
-QString BaseAuthStore::token() const {
-    return m_baseToken;
-}
+BaseAuthStore::BaseAuthStore(const QString& baseToken,
+                             RecordModel* baseModel,
+                             QObject* parent)
+    : QObject(parent),
+    m_baseModel(baseModel),
+    m_token(baseToken) {}
 
 RecordModel* BaseAuthStore::model() const {
     return m_baseModel;
@@ -15,7 +15,7 @@ RecordModel* BaseAuthStore::model() const {
 
 bool BaseAuthStore::isValid() const
 {
-    auto parts = m_baseToken.split(".");
+    auto parts = m_token.split(".");
 
     if (parts.size() != 3) {
         return false;
@@ -33,13 +33,51 @@ bool BaseAuthStore::isValid() const
     return jsonDoc["exp"].toDouble() > QDateTime::currentSecsSinceEpoch();
 }
 
+void BaseAuthStore::save()
+{
+    // Save to QSETTINGS
+    if(m_saveMode==SaveMode::NONE) return;
+
+}
+
 void BaseAuthStore::save(const QString& token, RecordModel* model) {
-    m_baseToken = token.isEmpty() ? "" : token;
+    setToken(token.isEmpty() ? "" : token);
     m_baseModel = model ? model : nullptr;
+
+    save();
 }
 
 void BaseAuthStore::clear() {
-    m_baseToken.clear();
+    m_token.clear();
     m_baseModel=nullptr;
+    setToken("");
+    save();
 }
+
+QString BaseAuthStore::getCollectionId() const { return ""; }
+
+QString BaseAuthStore::getCollectionName() const { return ""; }
+
+QString BaseAuthStore::token() const { return m_token; }
+
+void BaseAuthStore::setToken(const QString &newToken)
+{
+    m_token = newToken;
+    emit tokenChanged(newToken);
+    save();
+}
+
+BaseAuthStore::SaveMode BaseAuthStore::saveMode() const
+{
+    return m_saveMode;
+}
+
+void BaseAuthStore::setSaveMode(SaveMode newSaveMode)
+{
+    if (m_saveMode == newSaveMode)
+        return;
+    m_saveMode = newSaveMode;
+    emit saveModeChanged();
+}
+
 }
