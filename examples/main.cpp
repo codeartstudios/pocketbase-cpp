@@ -39,12 +39,25 @@ void testCrudRecords(pb::PocketBase* client);
 
 void testFileService(pb::PocketBase* client);
 
+void testFilter(pb::PocketBase* client) {
+    try {
+        QJsonObject filter;
+        filter["filter"] = "value=5";
+        auto user = client->collection("posts")->getFullList(20, filter);
+        qDebug() << "Admin User Token: " << user.size();
+    } catch (ClientResponseError e) {
+        qDebug() << QString("%1 %2").arg(QString::number(e.status()), e.what());
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
     PocketBase client{"http://127.0.0.1:5740/"};
+
+    testFilter(&client);
 
     // Admin Accounts
     // loginAdmin(&client);
@@ -58,7 +71,7 @@ int main(int argc, char *argv[])
 
     // testLogService(&client);
     // testUserAuthentication(&client);
-    // testCrudRecords(&client);
+    testCrudRecords(&client);
     testFileService(&client);
 
     return a.exec();

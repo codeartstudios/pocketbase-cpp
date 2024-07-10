@@ -84,14 +84,19 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
 
     // If there are query parameters, pass them into the URL
     if( params.contains("query") && !params.value("query").isNull() ) {
-        QUrlQuery q;
+        QUrlQuery q1;
+        QStringList q;
 
         for( const auto& key : params.value("query").toObject().keys() ) {
             QString value = params.value("query").toObject().value(key).toString();
-            q.addQueryItem(key, value);
+            // QString p = QString("%1=%2").arg(key, value);
+            // q.append(QUrl::toPercentEncoding(p));
+            q1.addQueryItem(key, value);
         }
-
-        url.setQuery(q);
+        //auto newUrl = url.toString() + "?" + q.join("&");
+        //qDebug() << "> New Url: " << newUrl;
+        // url.setUrl(newUrl);
+        url.setQuery(q1);
     }
 
     request.setUrl(url);
