@@ -3,8 +3,7 @@
 
 namespace pb {
 CollectionService::CollectionService(PocketBase* client, QObject *parent)
-    : QObject{parent},
-      CrudService(client, parent),
+    : CrudService(client, parent),
       client(client) {}
 
 QString CollectionService::baseCrudPath() const { return "/api/collections"; }

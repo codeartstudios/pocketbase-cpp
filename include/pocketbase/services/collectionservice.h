@@ -7,7 +7,7 @@
 #include "crudservice.h"
 
 namespace pb {
-class CollectionService : public QObject, public CrudService
+class CollectionService : public CrudService
 {
     Q_OBJECT
 public:

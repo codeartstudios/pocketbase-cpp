@@ -6,7 +6,7 @@
 
 namespace pb {
 LogService::LogService(PocketBase* client, QObject *parent)
-    : QObject(parent), BaseService(nullptr, client), client(client) {}
+    : BaseService(nullptr, client), client(client) {}
 
 LogsModel LogService::getOne(QString id, const QJsonObject &params) {
     if (id.isEmpty()) {

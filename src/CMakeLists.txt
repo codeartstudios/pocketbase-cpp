@@ -24,6 +24,7 @@ add_library(pocketbaselib STATIC
   ../include/pocketbase/services/realtimeservice.h services/realtimeservice.cpp
   ../include/pocketbase/services/sseclient.h services/sseclient.cpp
   ../include/pocketbase/services/event.h services/event.cpp
+  ../include/pocketbase/services/fileservice.h services/fileservice.cpp
   ../include/pocketbase/models/basemodel.h models/basemodel.cpp
   ../include/pocketbase/models/listresult.h models/listresult.cpp
   ../include/pocketbase/models/recordmodel.h ../include/pocketbase/models/collectionmodel.h
@@ -44,7 +45,6 @@ install(TARGETS pocketbaselib
 
 # localauthstore.h localauthstore.cpp
 # models/schemafield.h models/schemafield.cpp
-# fileservice.h fileservice.cpp
 # backupservice.h backupservice.cpp
 # models/backupmodel.hpp
 # models/fileuploadmodel.hpp

@@ -14,7 +14,7 @@ class ListResult;
 class BaseService;
 class BaseModel;
 
-class LogService: public QObject, public BaseService
+class LogService: public BaseService
 {
     Q_OBJECT
 public:

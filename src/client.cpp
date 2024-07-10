@@ -8,6 +8,7 @@
 #include <pocketbase/services/settingsservice.h>
 #include <pocketbase/services/logservice.h>
 #include <pocketbase/services/realtimeservice.h>
+#include <pocketbase/services/fileservice.h>
 
 namespace pb {
 PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout, QObject* parent)
@@ -22,7 +23,20 @@ PocketBase::PocketBase(const QString& baseUrl, const QString& lang, int timeout,
     m_healthService( new HealthService(this, this) ),
     m_settingsService( new SettingsService(this, this)),
     m_logService( new LogService(this, this) ),
-    m_realtimeService( new RealtimeService(this, this) ) {}
+    m_realtimeService( new RealtimeService(this, this) ),
+    m_fileService( new FileService(this, this) ) {
+    connect(m_authStore, &BaseAuthStore::tokenChanged, this, [&](QString token){
+        qDebug() << "Token Changed ...";
+        emit tokenChanged(token);
+    });
+
+    if(qApp->applicationName() == "")
+        qApp->setApplicationName("PocketBaseLib");
+    if(qApp->organizationName() == "")
+        qApp->setOrganizationName("PocketBaseLibCpp");
+
+    qsettings = new QSettings(qApp->organizationName(), qApp->applicationName());
+}
 
 AdminService *PocketBase::admins() const { return m_adminService; }
 
@@ -61,6 +75,8 @@ LogService *PocketBase::logs() const { return m_logService; }
 
 RealtimeService *PocketBase::realtime() const { return m_realtimeService; }
 
+FileService *PocketBase::files() const { return m_fileService; }
+
 QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);
     QNetworkRequest request;
@@ -68,14 +84,19 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
 
     // If there are query parameters, pass them into the URL
     if( params.contains("query") && !params.value("query").isNull() ) {
-        QUrlQuery q;
+        QUrlQuery q1;
+        QStringList q;
 
         for( const auto& key : params.value("query").toObject().keys() ) {
             QString value = params.value("query").toObject().value(key).toString();
-            q.addQueryItem(key, value);
+            // QString p = QString("%1=%2").arg(key, value);
+            // q.append(QUrl::toPercentEncoding(p));
+            q1.addQueryItem(key, value);
         }
-
-        url.setQuery(q);
+        //auto newUrl = url.toString() + "?" + q.join("&");
+        //qDebug() << "> New Url: " << newUrl;
+        // url.setUrl(newUrl);
+        url.setQuery(q1);
     }
 
     request.setUrl(url);
@@ -143,32 +164,31 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     return responseObject;
 }
 
-// QUrl PocketBase::getFileUrl(const RecordService& record, const QString& filename, const QMap<QString, QString>& queryParams) {
-//     // QStringList parts = { "api", "files", QUrl::toPercentEncoding(record.collectionId), QUrl::toPercentEncoding(record.getId()), QUrl::toPercentEncoding(filename) };
-//     // QUrl url = buildUrl(parts.join("/"));
-//     // if (!queryParams.isEmpty()) {
-//     //     QUrlQuery query;
-//     //     for (auto it = queryParams.begin(); it != queryParams.end(); ++it) {
-//     //         query.addQueryItem(it.key(), it.value());
-//     //     }
-//     //     url.setQuery(query);
-//     // }
-//     return QUrl{};
-// }
+QString PocketBase::getFileToken() { return m_fileService->getToken(); }
 
-QString PocketBase::getFileToken() {
-    QJsonObject params;
-    params.insert("method", "POST");
+QUrl PocketBase::getFileUrl(
+    const RecordModel &record,
+    const QString &filename,
+    const QJsonObject &queryParams) {
+    QString thumb = queryParams.value("thumb").toString("");
+    QString token = queryParams.value("token").toString("");
+    bool download = queryParams.value("download").toBool(false);
 
-    auto reply = send("/api/files/token", params);
+    QString url = m_fileService->getUrl(record, filename, thumb, token, download);
+    return QUrl(url);
+}
 
-    // auto data = reply->readAll().data();
+QUrl PocketBase::getFileUrl(
+    const QString& collectionIdOrName,
+    const QString& recordId,
+    const QString &filename,
+    const QJsonObject &queryParams) {
+    QString thumb = queryParams.value("thumb").toString("");
+    QString token = queryParams.value("token").toString("");
+    bool download = queryParams.value("download").toBool(false);
 
-    //qDebug() << "Reply [File Token] " << data;
-
-    // Handle reply and extract token
-
-    return QString(); // Placeholder
+    QString url = m_fileService->getUrl(collectionIdOrName, recordId, filename, thumb, token, download);
+    return QUrl(url);
 }
 
 QString PocketBase::baseUrl() const
@@ -197,5 +217,17 @@ void PocketBase::setLang(const QString &newLang)
         return;
     m_lang = newLang;
     emit langChanged();
+}
+
+void PocketBase::setValue(QString key, QString category, QVariant value)
+{
+    qsettings->setValue(key+"/"+category,value.toString());
+}
+
+QVariant PocketBase::getValue(QString key, QString category)
+{
+    QVariant value = qsettings->value(key+"/"+category).toString();
+
+    return value;
 }
 }

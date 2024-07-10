@@ -14,6 +14,8 @@
 #include <QJsonValue>
 #include <QJsonDocument>
 #include <QDebug>
+#include <QSettings>
+#include <QCoreApplication>
 
 namespace pb {
 class AdminService;
@@ -23,7 +25,9 @@ class CollectionService;
 class HealthService;
 class SettingsService;
 class LogService;
+class FileService;
 class RealtimeService;
+class RecordModel;
 
 class PocketBase : public QObject
 {
@@ -42,11 +46,21 @@ public:
     SettingsService* settings() const;
     LogService* logs() const;
     RealtimeService* realtime() const;
+    FileService* files() const;
 
-    QJsonObject send(const QString& path, const QJsonObject params);
+    QJsonObject send(const QString& path,
+                     const QJsonObject params);
 
     QString getFileToken();
     QUrl buildUrl(const QString& path);
+
+    QUrl getFileUrl(const RecordModel& record,
+                    const QString& filename,
+                    const QJsonObject& queryParams = {});
+    QUrl getFileUrl(const QString &collectionIdOrName,
+                    const QString &recordId,
+                    const QString &filename,
+                    const QJsonObject &queryParams = {});
 
     QString baseUrl() const;
     void setBaseUrl(const QString &newBaseUrl);
@@ -54,10 +68,14 @@ public:
     QString lang() const;
     void setLang(const QString &newLang);
 
+    void setValue(QString key, QString category, QVariant value);
+    QVariant getValue(QString key, QString category);
+
 signals:
     void baseUrlChanged();
     void langChanged();
     void requestFinished(QNetworkReply* reply);
+    void tokenChanged(const QString &token);
 
 private:
     QString m_baseurl, m_lang;
@@ -71,7 +89,9 @@ private:
     SettingsService* m_settingsService;
     LogService* m_logService;
     RealtimeService* m_realtimeService;
+    FileService* m_fileService;
 
+    QSettings* qsettings;
     QMap<QString, RecordService*> m_recordServices;
 };
 

@@ -22,7 +22,7 @@ ListResult BaseCrudService::_getList(
     QJsonObject params = queryParams;
     params["page"] = QString::number(page);
     params["perPage"] = QString::number(perPage);
-    params["skipTotal"] = skipTotal ? "true":"false";
+    if( skipTotal ) params["skipTotal"] = QString::number(1);
 
     QJsonObject payload;
     payload.insert("method", "GET");
@@ -67,7 +67,7 @@ BaseModel* BaseCrudService::_getFirstListItem(
     const QJsonObject& queryParams) {
     QJsonObject payload, params = queryParams;
     params["filter"] = filter;
-    params["$cancelKey"] = "one_by_filter_" + basePath + "_" + filter;
+    // params["$cancelKey"] = "one_by_filter_" + basePath + "_" + filter;
 
     ListResult result = _getList(basePath, 1, 1, false, params);
 

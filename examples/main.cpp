@@ -10,6 +10,7 @@
 #include <pocketbase/services/logservice.h>
 #include <pocketbase/models/adminmodel.h>
 #include <pocketbase/models/logsmodel.h>
+#include <pocketbase/services/fileservice.h>
 
 #include <QTimer>
 
@@ -36,6 +37,19 @@ void testUserAuthentication(pb::PocketBase* client);
 
 void testCrudRecords(pb::PocketBase* client);
 
+void testFileService(pb::PocketBase* client);
+
+void testFilter(pb::PocketBase* client) {
+    try {
+        QJsonObject filter;
+        filter["filter"] = "value=5";
+        auto user = client->collection("posts")->getFullList(20, filter);
+        qDebug() << "Admin User Token: " << user.size();
+    } catch (ClientResponseError e) {
+        qDebug() << QString("%1 %2").arg(QString::number(e.status()), e.what());
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -43,19 +57,22 @@ int main(int argc, char *argv[])
 
     PocketBase client{"http://127.0.0.1:5740/"};
 
+    testFilter(&client);
+
     // Admin Accounts
-    loginAdmin(&client);
-    createAdminAccount(&client);
-    getAdmins(&client);
-    deleteAdminAccount(&client);
+    // loginAdmin(&client);
+    // createAdminAccount(&client);
+    // getAdmins(&client);
+    // deleteAdminAccount(&client);
 
-    subscribeToRecord(&client, "collectionIdOrName");
-    testCollections(&client);
-    testHealthCheck(&client);
+    // subscribeToRecord(&client, "collectionIdOrName");
+    // testCollections(&client);
+    // testHealthCheck(&client);
 
-    testLogService(&client);
-    testUserAuthentication(&client);
+    // testLogService(&client);
+    // testUserAuthentication(&client);
     testCrudRecords(&client);
+    testFileService(&client);
 
     return a.exec();
 }
@@ -261,5 +278,23 @@ void testHealthCheck(pb::PocketBase* client) {
         qDebug() << "Response: " << health;
     } catch (ClientResponseError e) {
         qDebug() << "Error thrown! -> " << e.what() << "\t" << e.status();
+    }
+}
+
+void testFileService(pb::PocketBase* client) {
+    try {
+        QObject::connect(client, &PocketBase::tokenChanged, [&](QString token){
+            qDebug() << "New Token: " << token;
+        });
+
+        auto loggedUser = client->collection("users")->authWithPassword("test@user.com", "123456789");
+        // qDebug() << client->files()->getUrl(loggedUser.record, "cat_TMRWGgRq8Z.jpg","","", true);
+        QJsonObject params;
+        params["download"] = true;
+        params["token"] = client->getFileToken();
+        qDebug() << client->getFileUrl(loggedUser.record, "cat_TMRWGgRq8Z.jpg", params);
+    } catch(ClientResponseError e) {
+        qDebug() << QString("> [%1] %2")
+                        .arg(QString::number(e.status()), e.what());
     }
 }

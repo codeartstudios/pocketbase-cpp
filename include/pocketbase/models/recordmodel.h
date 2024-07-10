@@ -16,11 +16,17 @@ public:
     QMap<QString, QVariant> expand;
 
     RecordModel(const QJsonObject &data) {
+        collectionName = data.value("collectionName").toString("");
+        collectionId = data.value("collectionId").toString("");
         load(data);
     }
 
     RecordModel(BaseModel* baseModel) {
-        load(baseModel->data());
+        auto data = baseModel->data();
+        collectionName = data.value("collectionName").toString("");
+        collectionId = data.value("collectionId").toString("");
+
+        load(data);
     }
 
     bool isEmpty() const { return expand.isEmpty(); }
@@ -40,11 +46,11 @@ public:
 
     static QList<RecordModel> parseExpanded(const QVariant &data) {
         QList<RecordModel> recordModels;
-        if (data.type() == QVariant::List) {
-            for (const auto &item : data.toList()) {
-                //recordModels.append(RecordModel(item.toJsonObject()));
-            }
-        } else if (data.type() == QVariant::Map) {
+        if (data.typeId() == QMetaType::QJsonArray) {
+            // for (const auto &item : data.toList()) {
+            //     //recordModels.append(RecordModel(item.toJsonObject()));
+            // }
+        } else if (data.typeId() == QMetaType::QVariantMap) {
             //recordModels.append(RecordModel(data.toJsonObject()));
         }
         return recordModels;
@@ -56,6 +62,10 @@ public:
             // expand[it.key()] = QVariantList(l.begin(), l.end());
         }
     }
+
+    QString getCollectionName() const { return collectionName; }
+
+    QString getCollectionId() const { return collectionId; }
 };
 }
 
