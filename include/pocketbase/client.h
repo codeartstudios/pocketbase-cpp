@@ -12,9 +12,14 @@
 #include <QNetworkRequest>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonValue>
 #include <QJsonDocument>
 #include <QDebug>
 #include <QSettings>
+#include <QFile>
+#include <QFileInfo>
+#include <QMimeDatabase>
+#include <QMimeType>
 #include <QCoreApplication>
 
 namespace pb {
@@ -70,6 +75,9 @@ public:
 
     void setValue(QString key, QString category, QVariant value);
     QVariant getValue(QString key, QString category);
+
+private:
+    QByteArray convertJsonValueToByteArray(const QJsonValue& value);
 
 signals:
     void baseUrlChanged();

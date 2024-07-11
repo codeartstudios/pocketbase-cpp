@@ -49,4 +49,23 @@ QString FileService::getToken() {
     auto jsonResponse = client->send("/api/files/token", payload);
     return jsonResponse["data"].toObject().value("token").toString();
 }
+
+FileUpload::FileUpload(const QString &path) {
+    fileList.clear();
+    fileList.append(path);
+}
+
+FileUpload::FileUpload(const QStringList &paths) {
+    fileList.clear();
+    fileList.append(paths.begin(), paths.end());
+}
+
+QJsonObject FileUpload::toObject() {
+    QJsonObject resp;
+    resp["type"] = "files";
+    resp["files"] = QJsonArray::fromStringList(fileList);
+
+    return resp;
+}
+
 }

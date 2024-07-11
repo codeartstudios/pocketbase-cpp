@@ -80,12 +80,11 @@ FileService *PocketBase::files() const { return m_fileService; }
 QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     QUrl url = buildUrl(path);
     QNetworkRequest request;
-    request.setRawHeader("Content-Type", "application/json");
 
     // If there are query parameters, pass them into the URL
     if( params.contains("query") && !params.value("query").isNull() ) {
         QUrlQuery q1;
-        QStringList q;
+        // QStringList q;
 
         for( const auto& key : params.value("query").toObject().keys() ) {
             QString value = params.value("query").toObject().value(key).toString();
@@ -108,37 +107,119 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
     if( params.contains("headers") &&
         params.value("headers").toObject().contains("auth") &&
         !params.value("headers").toObject().value("auth").toBool()) {}
+
     // Explicitly pass the auth header unless specified to be ignored
     else {
         request.setRawHeader("Authorization", "Bearer " + m_authStore->token().toUtf8());
     }
 
+    auto bodyJson = params.value("body").toObject(QJsonObject());
+    QStringList textKeys, fileKeys;
+
+    // Extract the keys, into the text and file arrays
+    for(const auto& key : bodyJson.keys()) {
+        auto obj = bodyJson.value(key).toObject();
+        if( obj.value("type").toString("") == "files" ) {
+            fileKeys.append(key);
+        } else {
+            textKeys.append(key);
+        }
+    }
+
     QNetworkReply* reply;
-    QJsonDocument doc(params.value("body").toObject());
+    QJsonDocument doc(bodyJson);
 
-    if(params.value("method").toString() == "GET") {
-        reply = m_networkManager->get(request);
-    }
+    // If we have files to upload, lets handle it in the multipart
+    if ( fileKeys.size() > 0 &&
+        (params.value("method").toString() == "POST" ||
+         params.value("method").toString() == "PUT" ||
+         params.value("method").toString() == "PATCH" )) {
+        QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    else if(params.value("method").toString() == "POST") {
-        reply = m_networkManager->post(request, doc.toJson());
-    }
+        for(const auto& key : textKeys ) {
+            QHttpPart jsonPart;
+            jsonPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                               QVariant(QString("form-data; name=\"%1\"").arg(key)));
 
-    else if(params.value("method").toString() == "PATCH" ) {
-        reply = m_networkManager->sendCustomRequest(request, "PATCH", doc.toJson());
-    }
+            auto ba = convertJsonValueToByteArray(bodyJson.value(key));
+            jsonPart.setBody(ba);
+            multiPart->append(jsonPart);
+        }
 
-    else if(params.value("method").toString() == "PUT") {
-        reply = m_networkManager->put(request, doc.toJson());
-    }
+        // Add files to multipart
+        for ( const auto& key : fileKeys ) {
+            auto obj = bodyJson.value(key).toObject();
+            auto filesArray = obj.value("files").toArray();
 
-    else if(params.value("method").toString() == "DELETE") {
-        reply = m_networkManager->deleteResource(request);
+            for( const auto& filePath : filesArray ) {
+                QFile* file = new QFile(filePath.toString());
+                QString fileName = QFileInfo(file->fileName()).fileName();
+
+                if(!file->exists()) {
+                    throw ClientResponseError("File not found", 0, file->fileName());
+                }
+
+                if (!file->open(QIODevice::ReadOnly)) {
+                    // QString err = file->errorString();
+                    throw ClientResponseError("Error opening attached file", 0, file->fileName());
+                }
+
+                QMimeDatabase mimeDatabase;
+                QMimeType mimeType = mimeDatabase.mimeTypeForFile(file->fileName());
+                QString mimeTypeName = mimeType.name(); // This holds the MIME type (e.g., "image/jpeg")
+
+                QHttpPart filePart;
+                filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(mimeTypeName));
+                filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                                   QVariant(QString("form-data; name=\"%1\"; filename=\"%2\"").arg(key, fileName)));
+                filePart.setBodyDevice(file);
+                file->setParent(multiPart); // We set the parent to ensure file is deleted with multiPart
+                multiPart->append(filePart);
+            }
+        }
+
+        if (params.value("method").toString() == "POST") {
+            reply = m_networkManager->post(request, multiPart);
+        }
+
+        else if (params.value("method").toString() == "PUT") {
+            reply = m_networkManager->put(request, multiPart);
+        }
+
+        else {
+            reply = m_networkManager->sendCustomRequest(request, "PATCH", multiPart);
+        }
+
+        multiPart->setParent(reply); // Ensure multiPart is deleted with reply
     }
 
     else {
-        throw ClientResponseError("Unhandled Method", 404);
-        qDebug() << "Unhandled: " << params.value("method").toString();
+        request.setRawHeader("Content-Type", "application/json");
+
+        if(params.value("method").toString() == "GET") {
+            reply = m_networkManager->get(request);
+        }
+
+        else if(params.value("method").toString() == "POST") {
+            reply = m_networkManager->post(request, doc.toJson());
+        }
+
+        else if(params.value("method").toString() == "PATCH" ) {
+            reply = m_networkManager->sendCustomRequest(request, "PATCH", doc.toJson());
+        }
+
+        else if(params.value("method").toString() == "PUT") {
+            reply = m_networkManager->put(request, doc.toJson());
+        }
+
+        else if(params.value("method").toString() == "DELETE") {
+            reply = m_networkManager->deleteResource(request);
+        }
+
+        else {
+            throw ClientResponseError("Unhandled Method", 404);
+            qDebug() << "Unhandled: " << params.value("method").toString();
+        }
     }
 
     QEventLoop wait_loop;
@@ -156,7 +237,8 @@ QJsonObject PocketBase::send(const QString& path, const QJsonObject params) {
         responseObject.insert("error", reply->errorString());
     }
 
-    if( statusCode >= 400 ) {
+    if( statusCode >= 400 || statusCode < 200 ) {
+        qDebug() << resJsonDoc;
         QString msg = resJsonDoc.object()["message"].toString();
         throw ClientResponseError(msg, statusCode, request.url().toString());
     }
@@ -229,5 +311,37 @@ QVariant PocketBase::getValue(QString key, QString category)
     QVariant value = qsettings->value(key+"/"+category).toString();
 
     return value;
+}
+
+QByteArray PocketBase::convertJsonValueToByteArray(const QJsonValue &value) {
+    QByteArray byteArray;
+
+    switch (value.type()) {
+    case QJsonValue::Bool:
+        byteArray = value.toBool() ? "true" : "false";
+        break;
+    case QJsonValue::Double:
+        byteArray = QByteArray::number(value.toDouble());
+        break;
+    case QJsonValue::String:
+        byteArray = value.toString().toUtf8();
+        break;
+    case QJsonValue::Array: {
+        QJsonDocument doc(value.toArray());
+        byteArray = doc.toJson(QJsonDocument::Compact);
+        break;
+    }
+    case QJsonValue::Object: {
+        QJsonDocument doc(value.toObject());
+        byteArray = doc.toJson(QJsonDocument::Compact);
+        break;
+    }
+    case QJsonValue::Null:
+    case QJsonValue::Undefined:
+        byteArray = "null";
+        break;
+    }
+
+    return byteArray;
 }
 }
