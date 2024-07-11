@@ -13,6 +13,7 @@
 #include <pocketbase/services/fileservice.h>
 
 #include <QTimer>
+#include <QFile>
 
 using namespace pb;
 
@@ -39,25 +40,19 @@ void testCrudRecords(pb::PocketBase* client);
 
 void testFileService(pb::PocketBase* client);
 
-void testFilter(pb::PocketBase* client) {
-    try {
-        QJsonObject filter;
-        filter["filter"] = "value=5";
-        auto user = client->collection("posts")->getFullList(20, filter);
-        qDebug() << "Admin User Token: " << user.size();
-    } catch (ClientResponseError e) {
-        qDebug() << QString("%1 %2").arg(QString::number(e.status()), e.what());
-    }
-}
+void testFilter(pb::PocketBase* client);
+
+void testFileUpload(pb::PocketBase* client);
 
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    PocketBase client{"http://127.0.0.1:5740/"};
+    PocketBase client{"https://apps.codeartstudios.net/finance-tracker"};
 
-    testFilter(&client);
+    // testFilter(&client);
+    // testFileUpload(&client);
 
     // Admin Accounts
     // loginAdmin(&client);
@@ -71,8 +66,8 @@ int main(int argc, char *argv[])
 
     // testLogService(&client);
     // testUserAuthentication(&client);
-    testCrudRecords(&client);
-    testFileService(&client);
+    // testCrudRecords(&client);
+    // testFileService(&client);
 
     return a.exec();
 }
@@ -296,5 +291,28 @@ void testFileService(pb::PocketBase* client) {
     } catch(ClientResponseError e) {
         qDebug() << QString("> [%1] %2")
                         .arg(QString::number(e.status()), e.what());
+    }
+}
+
+void testFilter(pb::PocketBase* client) {
+    try {
+        QJsonObject filter;
+        filter["filter"] = "value=5";
+        auto user = client->collection("posts")->getFullList(20, filter);
+        qDebug() << "Admin User Token: " << user.size();
+    } catch (ClientResponseError e) {
+        qDebug() << QString("%1 %2").arg(QString::number(e.status()), e.what());
+    }
+}
+
+void testFileUpload(pb::PocketBase* client) {
+    try {
+        auto resp = client->collection("users")->authWithPassword("<email or id>", "<password>");
+        QJsonObject updateObj;
+        QStringList f = {"<file url>"};
+        updateObj["<key>"] = FileUpload(f).toObject();
+        client->collection("<record>")->update("<id>", updateObj);
+    } catch (ClientResponseError e) {
+        qDebug() << QString("%1 %2").arg(QString::number(e.status()), e.what());
     }
 }
