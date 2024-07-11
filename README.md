@@ -31,7 +31,7 @@ Work still in progress, many breaking changes without notice as we try to match 
   - [X] Delete
   - [X] Realtime
 - [X] Collections Service
-- [ ] File Service (In plan)
+- [X] File Service 
 - [X] Health Service
 - [ ] Backup Service (Not planned)
 - [X] Log Service
